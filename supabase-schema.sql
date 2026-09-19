@@ -38,6 +38,22 @@ create table if not exists public.settings (
 insert into public.settings (id) values ('main') on conflict (id) do nothing;
 alter table public.settings enable row level security;
 
+-- Orders (Cash on Delivery)
+create table if not exists public.orders (
+  id         uuid primary key default gen_random_uuid(),
+  name       text not null,
+  phone      text not null,
+  address    text not null,
+  city       text,
+  notes      text,
+  payment    text default 'COD',
+  items      jsonb default '[]'::jsonb,
+  subtotal   numeric default 0,
+  status     text default 'new',
+  created_at timestamptz default now()
+);
+alter table public.orders enable row level security;
+
 -- ============================================================
 --  STORAGE:  Dashboard > Storage > New bucket
 --  Naam:  product-images   |   Public bucket:  ON (toggle)

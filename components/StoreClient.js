@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ""; // e.g. 923001234567
 const rs = (n) => "Rs " + Number(n || 0).toLocaleString("en-PK");
 
 export default function StoreClient({ initialProducts, initialSettings }) {
@@ -78,20 +77,6 @@ export default function StoreClient({ initialProducts, initialSettings }) {
   const cartKeys = Object.keys(cart).filter((k) => findProd(cart[k].id));
   const cartCount = cartKeys.reduce((s, k) => s + cart[k].qty, 0);
   const subtotal = cartKeys.reduce((s, k) => s + cart[k].price * cart[k].qty, 0);
-
-  const checkout = () => {
-    if (cartCount === 0) { showToast("Cart khaali hai 🛒"); return; }
-    const lines = cartKeys.map((k) => {
-      const it = cart[k]; const p = findProd(it.id);
-      return `• ${p.name}${it.size ? " (" + it.size + ")" : ""} x${it.qty} — ${rs(it.price * it.qty)}`;
-    });
-    const msg = `Assalamualaikum! Happy Frames se order:\n\n${lines.join("\n")}\n\n*Total: ${rs(subtotal)}*\n\nPlease confirm karein.`;
-    if (WHATSAPP) {
-      window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`, "_blank");
-    } else {
-      alert("Order summary:\n\n" + msg + "\n\n(WhatsApp number set karne ke liye NEXT_PUBLIC_WHATSAPP_NUMBER env variable daalein.)");
-    }
-  };
 
   // scroll reveal
   useEffect(() => {
@@ -231,7 +216,9 @@ export default function StoreClient({ initialProducts, initialSettings }) {
         </div>
         <div className="drawer__foot">
           <div className="row"><span>Subtotal</span><b>{rs(subtotal)}</b></div>
-          <button className="btn btn--primary btn--block" onClick={checkout}>Checkout on WhatsApp →</button>
+          {cartKeys.length > 0
+            ? <a href="/checkout" className="btn btn--primary btn--block">Checkout →</a>
+            : <button className="btn btn--primary btn--block" onClick={() => showToast("Cart khaali hai 🛒")}>Checkout →</button>}
         </div>
       </aside>
 

@@ -16,6 +16,7 @@ export default function AdminPage() {
   const [toast, setToast] = useState("");
   const [saleOn, setSaleOn] = useState(false);
   const [saleText, setSaleText] = useState("");
+  const [orders, setOrders] = useState([]);
 
   const showToast = (m) => { setToast(m); setTimeout(() => setToast(""), 2200); };
   const upd = (k, v) => setForm((f) => ({ ...f, [k]: v }));
@@ -28,8 +29,9 @@ export default function AdminPage() {
   const loadStatus = () => fetch("/api/login").then((r) => r.json()).then(setStatus).catch(() => setStatus({ admin: false }));
   const loadProducts = () => fetch("/api/products").then((r) => r.json()).then((d) => setProducts(d.products || [])).catch(() => {});
   const loadSettings = () => fetch("/api/settings").then((r) => r.json()).then((d) => { if (d.settings) { setSaleOn(d.settings.saleOn); setSaleText(d.settings.saleText || ""); } }).catch(() => {});
+  const loadOrders = () => fetch("/api/orders").then((r) => r.json()).then((d) => { if (Array.isArray(d.orders)) setOrders(d.orders); }).catch(() => {});
 
-  useEffect(() => { loadStatus(); loadProducts(); loadSettings(); }, []);
+  useEffect(() => { loadStatus(); loadProducts(); loadSettings(); loadOrders(); }, []);
 
   const saveSale = async (nextOn) => {
     const on = nextOn !== undefined ? nextOn : saleOn;
@@ -42,7 +44,7 @@ export default function AdminPage() {
     e.preventDefault();
     setLoginErr("");
     const r = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password }) });
-    if (r.ok) { setPassword(""); loadStatus(); } else { const d = await r.json().catch(() => ({})); setLoginErr(d.error || "Login fail"); }
+    if (r.ok) { setPassword(""); loadStatus(); loadOrders(); } else { const d = await r.json().catch(() => ({})); setLoginErr(d.error || "Login fail"); }
   };
   const logout = async () => { await fetch("/api/login", { method: "DELETE" }); loadStatus(); };
 
@@ -217,6 +219,29 @@ export default function AdminPage() {
               <div className="info"><b>{p.name}</b><span>{p.cat} · {rs(p.price)}{p.badge ? " · " + p.badge : ""}</span></div>
               <button className="iconbtn" onClick={() => startEdit(p)} title="Edit">✎</button>
               <button className="iconbtn del" onClick={() => del(p)} title="Delete">🗑</button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ORDERS */}
+      <div className="acard" style={{ marginTop: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+          <h2 style={{ margin: 0 }}>Orders ({orders.length})</h2>
+          <button className="btn btn--ghost btn--sm" onClick={loadOrders}>↻ Refresh</button>
+        </div>
+        {orders.length === 0 && <p style={{ color: "var(--cream-dim)", fontSize: 14, margin: 0 }}>Abhi koi order nahi aaya.</p>}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {orders.map((o) => (
+            <div className="ordrow" key={o.id}>
+              <div className="ordhead">
+                <b>{o.name}</b>
+                <span className="ordtotal">{rs(o.subtotal)} · COD</span>
+              </div>
+              <div className="ordmeta">📞 {o.phone}{o.city ? " · " + o.city : ""} · <span style={{ color: "var(--cream-dim)" }}>{new Date(o.created_at).toLocaleString()}</span></div>
+              <div className="ordmeta">📍 {o.address}</div>
+              {o.notes ? <div className="ordmeta">📝 {o.notes}</div> : null}
+              <div className="orditems">{(o.items || []).map((it, i) => `${it.name}${it.size ? " (" + it.size + ")" : ""} ×${it.qty}`).join(",  ")}</div>
             </div>
           ))}
         </div>
