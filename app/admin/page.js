@@ -14,6 +14,8 @@ export default function AdminPage() {
   const [editingId, setEditingId] = useState(null);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState("");
+  const [saleOn, setSaleOn] = useState(false);
+  const [saleText, setSaleText] = useState("");
 
   const showToast = (m) => { setToast(m); setTimeout(() => setToast(""), 2200); };
   const upd = (k, v) => setForm((f) => ({ ...f, [k]: v }));
@@ -25,8 +27,16 @@ export default function AdminPage() {
 
   const loadStatus = () => fetch("/api/login").then((r) => r.json()).then(setStatus).catch(() => setStatus({ admin: false }));
   const loadProducts = () => fetch("/api/products").then((r) => r.json()).then((d) => setProducts(d.products || [])).catch(() => {});
+  const loadSettings = () => fetch("/api/settings").then((r) => r.json()).then((d) => { if (d.settings) { setSaleOn(d.settings.saleOn); setSaleText(d.settings.saleText || ""); } }).catch(() => {});
 
-  useEffect(() => { loadStatus(); loadProducts(); }, []);
+  useEffect(() => { loadStatus(); loadProducts(); loadSettings(); }, []);
+
+  const saveSale = async (nextOn) => {
+    const on = nextOn !== undefined ? nextOn : saleOn;
+    const r = await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ saleOn: on, saleText }) });
+    if (r.ok) { const d = await r.json(); setSaleOn(d.settings.saleOn); setSaleText(d.settings.saleText || ""); showToast("Sale settings save ✅"); }
+    else { const d = await r.json().catch(() => ({})); showToast(d.error || "Save fail"); }
+  };
 
   const login = async (e) => {
     e.preventDefault();
@@ -116,6 +126,28 @@ export default function AdminPage() {
       </div>
 
       {!status.supabase && <div className="note warn">⚠️ Supabase set nahi hai — abhi demo products dikh rahe hain aur save kaam nahi karega. README mein diye steps follow karke keys daalein.</div>}
+
+      {/* SALE CONTROL */}
+      <div className="acard" style={{ marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+          <div>
+            <h2 style={{ marginBottom: 4 }}>Sale Banner {saleOn ? "🟢 ON" : "⚪ OFF"}</h2>
+            <p style={{ color: "var(--cream-dim)", fontSize: 13.5, margin: 0 }}>
+              {saleOn ? "Top sale marquee aur sale section store par dikh raha hai." : "Sale abhi band hai — store par koi sale banner nahi dikh raha."}
+            </p>
+          </div>
+          <button className={"btn " + (saleOn ? "btn--ghost" : "btn--primary")} onClick={() => saveSale(!saleOn)}>
+            {saleOn ? "Turn OFF sale" : "Turn ON sale 🎉"}
+          </button>
+        </div>
+        <div className="field" style={{ marginTop: 16, marginBottom: 0 }}>
+          <label>Sale banner text</label>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <input style={{ flex: 1, minWidth: 200 }} value={saleText} onChange={(e) => setSaleText(e.target.value)} placeholder="🎉 MEGA SALE — Flat 40% OFF on all frames" />
+            <button className="btn btn--ghost btn--sm" onClick={() => saveSale()}>Save text</button>
+          </div>
+        </div>
+      </div>
 
       <div className="admin__cols">
         {/* FORM */}

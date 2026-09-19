@@ -4,8 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ""; // e.g. 923001234567
 const rs = (n) => "Rs " + Number(n || 0).toLocaleString("en-PK");
 
-export default function StoreClient({ initialProducts }) {
+export default function StoreClient({ initialProducts, initialSettings }) {
   const [products, setProducts] = useState(initialProducts || []);
+  const [settings, setSettings] = useState(initialSettings || { saleOn: false, saleText: "" });
   const [activeCat, setActiveCat] = useState("All");
   const [cart, setCart] = useState({});
   const [favs, setFavs] = useState({});
@@ -29,11 +30,15 @@ export default function StoreClient({ initialProducts }) {
     try { localStorage.setItem("hf_cart_v2", JSON.stringify(cart)); } catch (e) {}
   }, [cart]);
 
-  // mount ke baad fresh products (admin changes ke liye)
+  // mount ke baad fresh products + settings (admin changes ke liye)
   useEffect(() => {
     fetch("/api/products")
       .then((r) => r.json())
       .then((d) => { if (d && Array.isArray(d.products)) setProducts(d.products); })
+      .catch(() => {});
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((d) => { if (d && d.settings) setSettings(d.settings); })
       .catch(() => {});
   }, []);
 
@@ -101,7 +106,7 @@ export default function StoreClient({ initialProducts }) {
 
   return (
     <>
-      <Marquee />
+      {settings.saleOn && <Marquee text={settings.saleText} />}
       <Header cartCount={cartCount} onCart={() => setCartOpen(true)} />
 
       <section className="hero">
@@ -197,7 +202,7 @@ export default function StoreClient({ initialProducts }) {
       </section>
 
       <Features />
-      <Promo />
+      {settings.saleOn && <Promo />}
       <Newsletter value={news} setValue={setNews} onSubmit={() => setNews("done")} />
       <Footer />
 
@@ -235,8 +240,8 @@ export default function StoreClient({ initialProducts }) {
   );
 }
 
-function Marquee() {
-  const items = ["🎉 MEGA SALE — Flat 40% OFF on all frames", "🚚 Free delivery all over Pakistan", "🎁 Buy 2 Get 1 Free this week", "💛 Frames that make you happy"];
+function Marquee({ text }) {
+  const items = [text || "🎉 MEGA SALE", "🚚 Free delivery all over Pakistan", "🎁 Buy 2 Get 1 Free this week", "💛 Frames that make you happy"];
   return (
     <div className="marquee" aria-label="Announcements">
       <div className="marquee__track">
@@ -250,7 +255,7 @@ function Header({ cartCount, onCart }) {
   return (
     <header className="header">
       <div className="wrap nav">
-        <a className="logo" href="#top"><span className="face">^_</span> Happy Frames</a>
+        <a className="logo" href="#top"><img className="logo-img" src="/logo.jpg" alt="Happy Frames" /></a>
         <nav className="nav__links"><a href="#shop">Shop</a><a href="#featured">Bestsellers</a><a href="#why">Why Us</a><a href="#contact">Contact</a></nav>
         <button className="cart-btn" onClick={onCart}>🛒 <span className="lbl">Cart</span> <span className="count">{cartCount}</span></button>
       </div>
@@ -334,7 +339,7 @@ function Footer() {
       <div className="wrap">
         <div className="foot__grid">
           <div className="foot__brand">
-            <a className="logo" href="#top"><span className="face">^_</span> Happy Frames</a>
+            <a className="logo" href="#top"><img className="logo-img" src="/logo.jpg" alt="Happy Frames" /></a>
             <p>Frames that make you happy. Handcrafted with love in Pakistan. 💛</p>
             <div className="social">
               <a href="https://www.instagram.com/happy.frames_/" target="_blank" rel="noopener" aria-label="Instagram">📸</a>

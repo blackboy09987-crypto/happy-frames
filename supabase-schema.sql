@@ -28,6 +28,16 @@ alter table public.products add column if not exists sizes jsonb default '[]'::j
 -- aur koi public policy add na karein — service role RLS bypass karta hai.
 alter table public.products enable row level security;
 
+-- Site settings (sale banner on/off, sale text) — ek singleton row
+create table if not exists public.settings (
+  id         text primary key default 'main',
+  sale_on    boolean default false,
+  sale_text  text default '',
+  updated_at timestamptz default now()
+);
+insert into public.settings (id) values ('main') on conflict (id) do nothing;
+alter table public.settings enable row level security;
+
 -- ============================================================
 --  STORAGE:  Dashboard > Storage > New bucket
 --  Naam:  product-images   |   Public bucket:  ON (toggle)
