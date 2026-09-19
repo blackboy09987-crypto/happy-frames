@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { GRADIENTS } from "@/lib/seed";
 
 const rs = (n) => "Rs " + Number(n || 0).toLocaleString("en-PK");
-const EMPTY = { name: "", cat: "", price: "", old: "", rating: "4.9", badge: "", emoji: "🖼️", g: GRADIENTS[0], img: null };
+const EMPTY = { name: "", cat: "", price: "", old: "", rating: "4.9", badge: "", emoji: "🖼️", g: GRADIENTS[0], img: null, sizes: [] };
 
 export default function AdminPage() {
   const [status, setStatus] = useState(null); // {admin, supabase, passwordSet}
@@ -17,6 +17,11 @@ export default function AdminPage() {
 
   const showToast = (m) => { setToast(m); setTimeout(() => setToast(""), 2200); };
   const upd = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  // size options helpers
+  const addSize = () => setForm((f) => ({ ...f, sizes: [...(f.sizes || []), { label: "", price: "" }] }));
+  const updSize = (i, k, v) => setForm((f) => { const s = [...(f.sizes || [])]; s[i] = { ...s[i], [k]: v }; return { ...f, sizes: s }; });
+  const removeSize = (i) => setForm((f) => ({ ...f, sizes: (f.sizes || []).filter((_, idx) => idx !== i) }));
 
   const loadStatus = () => fetch("/api/login").then((r) => r.json()).then(setStatus).catch(() => setStatus({ admin: false }));
   const loadProducts = () => fetch("/api/products").then((r) => r.json()).then((d) => setProducts(d.products || [])).catch(() => {});
@@ -35,7 +40,7 @@ export default function AdminPage() {
 
   const startEdit = (p) => {
     setEditingId(p.id);
-    setForm({ name: p.name || "", cat: p.cat || "", price: p.price ?? "", old: p.old ?? "", rating: p.rating ?? "4.9", badge: p.badge || "", emoji: p.emoji || "🖼️", g: p.g || GRADIENTS[0], img: p.img || null });
+    setForm({ name: p.name || "", cat: p.cat || "", price: p.price ?? "", old: p.old ?? "", rating: p.rating ?? "4.9", badge: p.badge || "", emoji: p.emoji || "🖼️", g: p.g || GRADIENTS[0], img: p.img || null, sizes: Array.isArray(p.sizes) ? p.sizes.map((s) => ({ label: s.label, price: s.price })) : [] });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -53,12 +58,16 @@ export default function AdminPage() {
 
   const save = async () => {
     if (!form.name.trim()) return showToast("Product name likhein");
-    if (!form.price || Number(form.price) < 0) return showToast("Sahi price likhein");
+    const sizes = (form.sizes || []).filter((s) => s.label && s.label.trim()).map((s) => ({ label: s.label.trim(), price: Number(s.price) || 0 }));
+    const hasPrice = form.price && Number(form.price) > 0;
+    if (!hasPrice && sizes.length === 0) return showToast("Price ya kam se kam ek size likhein");
     setBusy(true);
     const body = {
-      name: form.name.trim(), cat: form.cat.trim() || "Frames", price: Number(form.price),
+      name: form.name.trim(), cat: form.cat.trim() || "Frames",
+      price: hasPrice ? Number(form.price) : 0,
       old: form.old ? Number(form.old) : null, rating: form.rating ? Number(form.rating) : 4.9,
       badge: form.badge, emoji: form.emoji.trim() || "🖼️", g: form.g, img: form.img || null,
+      sizes,
     };
     const url = editingId ? `/api/products/${editingId}` : "/api/products";
     const method = editingId ? "PUT" : "POST";
@@ -122,9 +131,26 @@ export default function AdminPage() {
             </div>
           </div>
           <div className="field row2">
-            <div className="field" style={{ margin: 0 }}><label>Price (Rs)</label><input type="number" value={form.price} onChange={(e) => upd("price", e.target.value)} placeholder="1499" /></div>
+            <div className="field" style={{ margin: 0 }}><label>Price (Rs){form.sizes && form.sizes.length ? " — base/from" : ""}</label><input type="number" value={form.price} onChange={(e) => upd("price", e.target.value)} placeholder="1499" /></div>
             <div className="field" style={{ margin: 0 }}><label>Old price (optional)</label><input type="number" value={form.old} onChange={(e) => upd("old", e.target.value)} placeholder="2499" /></div>
           </div>
+
+          {/* SIZE OPTIONS */}
+          <div className="field">
+            <label>Size options (optional) — har size ki apni price</label>
+            <div className="sizes-admin">
+              {(form.sizes || []).map((s, i) => (
+                <div className="sizerow" key={i}>
+                  <input placeholder="Size (e.g. A3)" value={s.label} onChange={(e) => updSize(i, "label", e.target.value)} />
+                  <input type="number" placeholder="Price" value={s.price} onChange={(e) => updSize(i, "price", e.target.value)} />
+                  <button type="button" className="iconbtn del" onClick={() => removeSize(i)} title="Remove">✕</button>
+                </div>
+              ))}
+              <button type="button" className="btn btn--ghost btn--sm" onClick={addSize} style={{ marginTop: 4 }}>+ Add size (A3, A4, A5…)</button>
+              {form.sizes && form.sizes.length > 0 && <p style={{ fontSize: 12, color: "var(--cream-dim)", margin: "8px 0 0" }}>Size add karne par customer ko chunne ka option milega aur price uske hisaab se badlegi.</p>}
+            </div>
+          </div>
+
           <div className="field row2">
             <div className="field" style={{ margin: 0 }}><label>Rating (0–5)</label><input type="number" min="0" max="5" step="0.1" value={form.rating} onChange={(e) => upd("rating", e.target.value)} /></div>
             <div className="field" style={{ margin: 0 }}><label>Emoji (photo na ho to)</label><input value={form.emoji} onChange={(e) => upd("emoji", e.target.value)} maxLength={4} placeholder="🖼️" /></div>

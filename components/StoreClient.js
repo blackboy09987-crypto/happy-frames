@@ -9,17 +9,24 @@ export default function StoreClient({ initialProducts }) {
   const [activeCat, setActiveCat] = useState("All");
   const [cart, setCart] = useState({});
   const [favs, setFavs] = useState({});
+  const [selSize, setSelSize] = useState({});
   const [cartOpen, setCartOpen] = useState(false);
   const [toast, setToast] = useState("");
   const [news, setNews] = useState("");
   const toastTimer = useRef(null);
 
-  // cart localStorage se load
+  // cart localStorage se load (v2 = size-aware format)
   useEffect(() => {
-    try { setCart(JSON.parse(localStorage.getItem("hf_cart") || "{}")); } catch (e) {}
+    try {
+      const saved = JSON.parse(localStorage.getItem("hf_cart_v2") || "{}");
+      // sirf sahi shape wale items rakho
+      const clean = {};
+      Object.keys(saved).forEach((k) => { if (saved[k] && typeof saved[k] === "object" && saved[k].id) clean[k] = saved[k]; });
+      setCart(clean);
+    } catch (e) {}
   }, []);
   useEffect(() => {
-    try { localStorage.setItem("hf_cart", JSON.stringify(cart)); } catch (e) {}
+    try { localStorage.setItem("hf_cart_v2", JSON.stringify(cart)); } catch (e) {}
   }, [cart]);
 
   // mount ke baad fresh products (admin changes ke liye)
@@ -43,26 +50,35 @@ export default function StoreClient({ initialProducts }) {
   const visible = activeCat === "All" ? products : products.filter((p) => p.cat === activeCat);
   const findProd = (id) => products.find((p) => String(p.id) === String(id));
 
-  const addToCart = (id) => { setCart((c) => ({ ...c, [id]: (c[id] || 0) + 1 })); setCartOpen(true); };
-  const setQty = (id, d) =>
+  const addToCart = (p) => {
+    const hasSizes = p.sizes && p.sizes.length;
+    const si = selSize[p.id] || 0;
+    const size = hasSizes ? p.sizes[si] : null;
+    const key = p.id + "|" + (size ? size.label : "");
+    const price = size ? size.price : p.price;
+    setCart((c) => ({ ...c, [key]: { id: p.id, size: size ? size.label : "", price, qty: (c[key]?.qty || 0) + 1 } }));
+    setCartOpen(true);
+  };
+  const setQty = (key, d) =>
     setCart((c) => {
-      const n = (c[id] || 0) + d;
+      const it = c[key]; if (!it) return c;
+      const q = it.qty + d;
       const nc = { ...c };
-      if (n <= 0) delete nc[id]; else nc[id] = n;
+      if (q <= 0) delete nc[key]; else nc[key] = { ...it, qty: q };
       return nc;
     });
-  const removeItem = (id) => setCart((c) => { const nc = { ...c }; delete nc[id]; return nc; });
+  const removeItem = (key) => setCart((c) => { const nc = { ...c }; delete nc[key]; return nc; });
   const toggleFav = (id) => setFavs((f) => ({ ...f, [id]: !f[id] }));
 
-  const cartIds = Object.keys(cart).filter((id) => findProd(id));
-  const cartCount = cartIds.reduce((s, id) => s + cart[id], 0);
-  const subtotal = cartIds.reduce((s, id) => s + findProd(id).price * cart[id], 0);
+  const cartKeys = Object.keys(cart).filter((k) => findProd(cart[k].id));
+  const cartCount = cartKeys.reduce((s, k) => s + cart[k].qty, 0);
+  const subtotal = cartKeys.reduce((s, k) => s + cart[k].price * cart[k].qty, 0);
 
   const checkout = () => {
     if (cartCount === 0) { showToast("Cart khaali hai 🛒"); return; }
-    const lines = cartIds.map((id) => {
-      const p = findProd(id);
-      return `• ${p.name} x${cart[id]} — ${rs(p.price * cart[id])}`;
+    const lines = cartKeys.map((k) => {
+      const it = cart[k]; const p = findProd(it.id);
+      return `• ${p.name}${it.size ? " (" + it.size + ")" : ""} x${it.qty} — ${rs(it.price * it.qty)}`;
     });
     const msg = `Assalamualaikum! Happy Frames se order:\n\n${lines.join("\n")}\n\n*Total: ${rs(subtotal)}*\n\nPlease confirm karein.`;
     if (WHATSAPP) {
@@ -138,7 +154,10 @@ export default function StoreClient({ initialProducts }) {
               <div className="empty-note">Jald hi naye frames aa rahe hain 💛</div>
             ) : (
               visible.map((p) => {
-                const off = p.old && p.old > p.price ? Math.round((1 - p.price / p.old) * 100) : 0;
+                const hasSizes = p.sizes && p.sizes.length > 0;
+                const si = selSize[p.id] || 0;
+                const curPrice = hasSizes ? p.sizes[si].price : p.price;
+                const off = !hasSizes && p.old && p.old > p.price ? Math.round((1 - p.price / p.old) * 100) : 0;
                 return (
                   <article className="card" key={p.id}>
                     <div className="card__img" style={{ background: p.g }}>
@@ -153,9 +172,20 @@ export default function StoreClient({ initialProducts }) {
                       <span className="card__cat">{p.cat}</span>
                       <span className="card__name">{p.name}</span>
                       <span className="card__rate">★ {Number(p.rating || 0).toFixed(1)} · in stock</span>
+                      {hasSizes && (
+                        <div className="sizes">
+                          {p.sizes.map((s, i) => (
+                            <button key={i} className={"size-chip" + (i === si ? " on" : "")} onClick={() => setSelSize((m) => ({ ...m, [p.id]: i }))}>{s.label}</button>
+                          ))}
+                        </div>
+                      )}
                       <div className="card__foot">
-                        <span className="price"><b>{rs(p.price)}</b>{p.old && p.old > p.price && <s>{rs(p.old)}</s>}</span>
-                        <button className="add" onClick={() => addToCart(p.id)} aria-label="Add to cart">+</button>
+                        <span className="price">
+                          {hasSizes && <em className="from">from</em>}
+                          <b>{rs(curPrice)}</b>
+                          {!hasSizes && p.old && p.old > p.price && <s>{rs(p.old)}</s>}
+                        </span>
+                        <button className="add" onClick={() => addToCart(p)} aria-label="Add to cart">+</button>
                       </div>
                     </div>
                   </article>
@@ -176,19 +206,19 @@ export default function StoreClient({ initialProducts }) {
       <aside className={"drawer" + (cartOpen ? " open" : "")} aria-label="Shopping cart">
         <div className="drawer__head"><h3>Your Cart</h3><button className="x" onClick={() => setCartOpen(false)} aria-label="Close">×</button></div>
         <div className="drawer__body">
-          {cartIds.length === 0 ? (
+          {cartKeys.length === 0 ? (
             <div className="cart-empty"><div className="big">🛒</div><p>Aapki cart khaali hai.<br />Kuch happy frames add karo!</p></div>
           ) : (
-            cartIds.map((id) => {
-              const p = findProd(id);
+            cartKeys.map((k) => {
+              const it = cart[k]; const p = findProd(it.id);
               return (
-                <div className="citem" key={id}>
+                <div className="citem" key={k}>
                   <div className="citem__img" style={{ background: p.g }}>{p.img ? <img src={p.img} alt="" /> : (p.emoji || "🖼️")}</div>
                   <div className="citem__mid">
-                    <b>{p.name}</b><span>{rs(p.price)}</span>
-                    <div className="qty"><button onClick={() => setQty(id, -1)}>−</button><b>{cart[id]}</b><button onClick={() => setQty(id, 1)}>+</button></div>
+                    <b>{p.name}</b><span>{it.size ? it.size + " · " : ""}{rs(it.price)}</span>
+                    <div className="qty"><button onClick={() => setQty(k, -1)}>−</button><b>{it.qty}</b><button onClick={() => setQty(k, 1)}>+</button></div>
                   </div>
-                  <button className="citem__rm" onClick={() => removeItem(id)}>Remove</button>
+                  <button className="citem__rm" onClick={() => removeItem(k)}>Remove</button>
                 </div>
               );
             })

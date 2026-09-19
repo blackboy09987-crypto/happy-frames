@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase";
-import { rowToProduct } from "@/lib/data";
+import { rowToProduct, cleanSizes } from "@/lib/data";
 import { isAdminRequest } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +15,11 @@ export async function PUT(req, { params }) {
   const patch = {};
   ["name", "cat", "badge", "emoji", "g", "img"].forEach((k) => { if (b[k] !== undefined) patch[k] = b[k]; });
   ["price", "old", "rating", "sort"].forEach((k) => { if (b[k] !== undefined) patch[k] = b[k] === null ? null : Number(b[k]); });
+  if (b.sizes !== undefined) {
+    const sizes = cleanSizes(b.sizes);
+    patch.sizes = sizes;
+    if (sizes.length && !patch.price) patch.price = Math.min(...sizes.map((s) => s.price));
+  }
 
   const { data, error } = await supabase.from("products").update(patch).eq("id", params.id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

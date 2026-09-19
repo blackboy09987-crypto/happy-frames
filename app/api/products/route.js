@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getProducts, rowToProduct } from "@/lib/data";
+import { getProducts, rowToProduct, cleanSizes } from "@/lib/data";
 import { getAdminClient } from "@/lib/supabase";
 import { isAdminRequest } from "@/lib/auth";
 
@@ -18,18 +18,22 @@ export async function POST(req) {
   if (!supabase) return NextResponse.json({ error: "Supabase configure nahi hai" }, { status: 400 });
 
   const b = await req.json().catch(() => ({}));
-  if (!b.name || b.price == null) return NextResponse.json({ error: "Naam aur price zaroori hai" }, { status: 400 });
+  const sizes = cleanSizes(b.sizes);
+  let price = Number(b.price) || 0;
+  if (sizes.length && !price) price = Math.min(...sizes.map((s) => s.price));
+  if (!b.name || (!price && !sizes.length)) return NextResponse.json({ error: "Naam aur price zaroori hai" }, { status: 400 });
 
   const row = {
     name: String(b.name).slice(0, 120),
     cat: b.cat ? String(b.cat).slice(0, 60) : "Frames",
-    price: Number(b.price) || 0,
+    price,
     old: b.old ? Number(b.old) : null,
     rating: b.rating != null ? Number(b.rating) : 4.9,
     badge: b.badge || "",
     emoji: b.emoji ? String(b.emoji).slice(0, 8) : "🖼️",
     g: b.g || "linear-gradient(135deg,#f4c9a1,#e8896b)",
     img: b.img || null,
+    sizes,
     sort: b.sort != null ? Number(b.sort) : Date.now(),
   };
 
