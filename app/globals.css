@@ -216,6 +216,9 @@ input,select,textarea{font-family:var(--font-body)}
 .pay-acct span{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream-dim)}
 .pay-acct b{font-family:var(--font-display);font-size:16px;letter-spacing:.02em}
 .pay-hint{font-size:12px;color:var(--cream-dim);margin:10px 0 0}
+.proof-done{display:flex;align-items:center;gap:12px;background:var(--navy-3);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.proof-done img{width:44px;height:44px;object-fit:cover;border-radius:8px}
+.proof-done span{flex:1;font-size:13px;color:var(--mint)}
 .co-summary{position:sticky;top:20px}
 .co-items{display:flex;flex-direction:column;gap:12px;margin-bottom:18px}
 .co-item{display:flex;align-items:center;gap:12px}

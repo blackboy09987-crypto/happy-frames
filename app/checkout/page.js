@@ -9,6 +9,8 @@ export default function CheckoutPage() {
   const [form, setForm] = useState({ name: "", phone: "", address: "", city: "", notes: "" });
   const [payment, setPayment] = useState("COD");
   const [txnId, setTxnId] = useState("");
+  const [proofUrl, setProofUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [settings, setSettings] = useState({ accountTitle: "", jazzcash: "", easypaisa: "" });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -25,7 +27,19 @@ export default function CheckoutPage() {
     fetch("/api/settings").then((r) => r.json()).then((d) => { if (d.settings) setSettings(d.settings); }).catch(() => {});
   }, []);
 
-  const acct = payment === "JazzCash" ? settings.jazzcash : payment === "Easypaisa" ? settings.easypaisa : "";
+  const acct = payment === "JazzCash" ? settings.jazzcash : payment === "UPaisa" ? settings.upaisa : "";
+
+  const uploadProof = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    const r = await fetch("/api/upload-proof", { method: "POST", body: fd });
+    setUploading(false);
+    if (r.ok) { const d = await r.json(); setProofUrl(d.url); }
+    else { const d = await r.json().catch(() => ({})); setErr(d.error || "Screenshot upload fail"); }
+  };
 
   const findProd = (id) => products.find((p) => String(p.id) === String(id));
   const keys = Object.keys(cart).filter((k) => findProd(cart[k].id));
@@ -39,7 +53,7 @@ export default function CheckoutPage() {
     if (keys.length === 0) { setErr("Cart khaali hai."); return; }
     setBusy(true);
     const items = keys.map((k) => ({ id: cart[k].id, size: cart[k].size, qty: cart[k].qty }));
-    const r = await fetch("/api/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, payment, txnId, items }) });
+    const r = await fetch("/api/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, payment, txnId, proofUrl, items }) });
     setBusy(false);
     if (r.ok) {
       const d = await r.json();
@@ -116,10 +130,10 @@ export default function CheckoutPage() {
                 </label>
               ) : null}
 
-              {settings.easypaisa ? (
-                <label className={"pay-opt" + (payment === "Easypaisa" ? " on" : "")}>
-                  <input type="radio" name="pay" checked={payment === "Easypaisa"} onChange={() => setPayment("Easypaisa")} />
-                  <div><b>Easypaisa</b><span>Number par bhej ke TID daalein.</span></div>
+              {settings.upaisa ? (
+                <label className={"pay-opt" + (payment === "UPaisa" ? " on" : "")}>
+                  <input type="radio" name="pay" checked={payment === "UPaisa"} onChange={() => setPayment("UPaisa")} />
+                  <div><b>UPaisa</b><span>Number par bhej ke TID daalein.</span></div>
                   <span className="pay-ic">📲</span>
                 </label>
               ) : null}
@@ -136,7 +150,19 @@ export default function CheckoutPage() {
                   <label>Transaction ID (TID) *</label>
                   <input value={txnId} onChange={(e) => setTxnId(e.target.value)} placeholder="Payment ke baad mili TID yahan daalein" />
                 </div>
-                <p className="pay-hint">Paisa bhejne ke baad app se TID copy karke yahan paste karein. Team verify karke order confirm karegi.</p>
+                <div className="field" style={{ marginTop: 12, marginBottom: 0 }}>
+                  <label>Payment screenshot (optional)</label>
+                  {proofUrl ? (
+                    <div className="proof-done">
+                      <img src={proofUrl} alt="proof" />
+                      <span>✅ Screenshot add ho gaya</span>
+                      <button type="button" className="iconbtn del" onClick={() => setProofUrl("")}>✕</button>
+                    </div>
+                  ) : (
+                    <label className="drop">{uploading ? "⏳ Uploading…" : "📷 Screenshot upload karein"}<input type="file" accept="image/*" hidden onChange={uploadProof} /></label>
+                  )}
+                </div>
+                <p className="pay-hint">Paisa bhejne ke baad app se TID copy karke daalein. Screenshot lagana optional hai par verify jaldi hoti hai. Team confirm karke order pakka karegi.</p>
               </div>
             )}
 

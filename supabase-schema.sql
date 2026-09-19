@@ -33,16 +33,16 @@ create table if not exists public.settings (
   id         text primary key default 'main',
   sale_on    boolean default false,
   sale_text  text default '',
-  account_title    text default '',
-  jazzcash_number  text default '',
-  easypaisa_number text default '',
+  account_title   text default '',
+  jazzcash_number text default '',
+  upaisa_number   text default '',
   updated_at timestamptz default now()
 );
 insert into public.settings (id) values ('main') on conflict (id) do nothing;
 alter table public.settings enable row level security;
 alter table public.settings add column if not exists account_title text default '';
 alter table public.settings add column if not exists jazzcash_number text default '';
-alter table public.settings add column if not exists easypaisa_number text default '';
+alter table public.settings add column if not exists upaisa_number text default '';
 
 -- Orders (Cash on Delivery)
 create table if not exists public.orders (
@@ -56,11 +56,13 @@ create table if not exists public.orders (
   items      jsonb default '[]'::jsonb,
   subtotal   numeric default 0,
   txn_id     text,
+  proof_url  text,
   status     text default 'new',
   created_at timestamptz default now()
 );
 alter table public.orders enable row level security;
 alter table public.orders add column if not exists txn_id text;
+alter table public.orders add column if not exists proof_url text;
 
 -- ============================================================
 --  STORAGE:  Dashboard > Storage > New bucket

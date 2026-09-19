@@ -23,7 +23,7 @@ export async function POST(req) {
   if (b.saleText !== undefined) patch.sale_text = String(b.saleText).slice(0, 200);
   if (b.accountTitle !== undefined) patch.account_title = String(b.accountTitle).slice(0, 80);
   if (b.jazzcash !== undefined) patch.jazzcash_number = String(b.jazzcash).slice(0, 40);
-  if (b.easypaisa !== undefined) patch.easypaisa_number = String(b.easypaisa).slice(0, 40);
+  if (b.upaisa !== undefined) patch.upaisa_number = String(b.upaisa).slice(0, 40);
 
   const { error } = await supabase.from("settings").upsert(patch);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

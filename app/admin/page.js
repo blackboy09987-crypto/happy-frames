@@ -16,7 +16,7 @@ export default function AdminPage() {
   const [toast, setToast] = useState("");
   const [saleOn, setSaleOn] = useState(false);
   const [saleText, setSaleText] = useState("");
-  const [pay, setPay] = useState({ accountTitle: "", jazzcash: "", easypaisa: "" });
+  const [pay, setPay] = useState({ accountTitle: "", jazzcash: "", upaisa: "" });
   const [orders, setOrders] = useState([]);
 
   const showToast = (m) => { setToast(m); setTimeout(() => setToast(""), 2200); };
@@ -29,7 +29,7 @@ export default function AdminPage() {
 
   const loadStatus = () => fetch("/api/login").then((r) => r.json()).then(setStatus).catch(() => setStatus({ admin: false }));
   const loadProducts = () => fetch("/api/products").then((r) => r.json()).then((d) => setProducts(d.products || [])).catch(() => {});
-  const loadSettings = () => fetch("/api/settings").then((r) => r.json()).then((d) => { if (d.settings) { setSaleOn(d.settings.saleOn); setSaleText(d.settings.saleText || ""); setPay({ accountTitle: d.settings.accountTitle || "", jazzcash: d.settings.jazzcash || "", easypaisa: d.settings.easypaisa || "" }); } }).catch(() => {});
+  const loadSettings = () => fetch("/api/settings").then((r) => r.json()).then((d) => { if (d.settings) { setSaleOn(d.settings.saleOn); setSaleText(d.settings.saleText || ""); setPay({ accountTitle: d.settings.accountTitle || "", jazzcash: d.settings.jazzcash || "", upaisa: d.settings.upaisa || "" }); } }).catch(() => {});
   const loadOrders = () => fetch("/api/orders").then((r) => r.json()).then((d) => { if (Array.isArray(d.orders)) setOrders(d.orders); }).catch(() => {});
 
   useEffect(() => { loadStatus(); loadProducts(); loadSettings(); loadOrders(); }, []);
@@ -167,7 +167,7 @@ export default function AdminPage() {
         <div className="field"><label>Account title (naam)</label><input value={pay.accountTitle} onChange={(e) => setPay({ ...pay, accountTitle: e.target.value })} placeholder="e.g. Happy Frames" /></div>
         <div className="field row2">
           <div className="field" style={{ margin: 0 }}><label>JazzCash number</label><input value={pay.jazzcash} onChange={(e) => setPay({ ...pay, jazzcash: e.target.value })} placeholder="03xxxxxxxxx" /></div>
-          <div className="field" style={{ margin: 0 }}><label>Easypaisa number</label><input value={pay.easypaisa} onChange={(e) => setPay({ ...pay, easypaisa: e.target.value })} placeholder="03xxxxxxxxx" /></div>
+          <div className="field" style={{ margin: 0 }}><label>UPaisa number</label><input value={pay.upaisa} onChange={(e) => setPay({ ...pay, upaisa: e.target.value })} placeholder="03xxxxxxxxx" /></div>
         </div>
         <button className="btn btn--primary" onClick={savePayment}>Save payment accounts</button>
       </div>
@@ -262,6 +262,7 @@ export default function AdminPage() {
               <div className="ordmeta">📞 {o.phone}{o.city ? " · " + o.city : ""} · <span style={{ color: "var(--cream-dim)" }}>{new Date(o.created_at).toLocaleString()}</span></div>
               <div className="ordmeta">📍 {o.address}</div>
               {o.txn_id ? <div className="ordmeta" style={{ color: "var(--gold)" }}>💳 {o.payment} TID: {o.txn_id}</div> : null}
+              {o.proof_url ? <div className="ordmeta"><a href={o.proof_url} target="_blank" rel="noopener" style={{ color: "var(--mint)", textDecoration: "underline" }}>🖼️ Payment screenshot dekhein</a></div> : null}
               {o.notes ? <div className="ordmeta">📝 {o.notes}</div> : null}
               <div className="orditems">{(o.items || []).map((it, i) => `${it.name}${it.size ? " (" + it.size + ")" : ""} ×${it.qty}`).join(",  ")}</div>
             </div>
