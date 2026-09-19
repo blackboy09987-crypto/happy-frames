@@ -334,11 +334,14 @@ function Footer() {
               <a href="#" aria-label="Facebook">f</a>
             </div>
           </div>
-          <div><h4>Shop</h4><a href="#shop">All Frames</a><a href="#shop">Bestsellers</a><a href="#shop">New Arrivals</a><a href="#featured">On Sale</a></div>
-          <div><h4>Help</h4><a href="#">Shipping</a><a href="#">Returns</a><a href="#">Size Guide</a><a href="#">Track Order</a></div>
-          <div><h4>Company</h4><a href="#">About Us</a><a href="#contact">Contact</a><a href="#">Custom Orders</a><a href="#">Reviews</a></div>
+          <div><h4>Shop</h4><a href="#shop">All Frames</a><a href="#shop">Bestsellers</a><a href="#shop">New Arrivals</a><a href="/checkout">Cart</a></div>
+          <div><h4>Help</h4><a href="/refund">Refund & Returns</a><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/contact">Track / Contact</a></div>
+          <div><h4>Company</h4><a href="/about">About Us</a><a href="/contact">Contact</a><a href="/privacy">Privacy Policy</a><a href="/terms">Terms</a></div>
         </div>
-        <div className="foot__bar"><span>© 2026 Happy Frames. All rights reserved.</span><span>Made with 💛 for happy walls</span></div>
+        <div className="foot__bar">
+          <span>© 2026 Happy Frames. All rights reserved.</span>
+          <span className="foot__links"><a href="/about">About</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/refund">Refund</a> · <a href="/contact">Contact</a></span>
+        </div>
       </div>
     </footer>
   );
