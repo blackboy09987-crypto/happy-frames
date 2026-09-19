@@ -119,7 +119,7 @@ export default function StoreClient({ initialProducts, initialSettings }) {
         </div>
         <div className="wrap">
           <div className="strip"><div className="strip__row">
-            <div>✋ Handmade</div><div>🌿 Eco Wood</div><div>🚚 Free Shipping</div><div>↩️ 7-Day Returns</div><div>🎨 Custom Sizes</div>
+            <div>✋ Handmade</div><div>🌿 Eco Wood</div><div>🚚 Fast Delivery</div><div>↩️ 7-Day Returns</div><div>🎨 Custom Sizes</div>
           </div></div>
         </div>
       </section>
@@ -228,7 +228,7 @@ export default function StoreClient({ initialProducts, initialSettings }) {
 }
 
 function Marquee({ text }) {
-  const items = [text || "🎉 MEGA SALE", "🚚 Free delivery all over Pakistan", "🎁 Buy 2 Get 1 Free this week", "💛 Frames that make you happy"];
+  const items = [text || "🎉 MEGA SALE", "🖼️ Handcrafted photo frames", "🎁 Buy 2 Get 1 Free this week", "💛 Frames that make you happy"];
   return (
     <div className="marquee" aria-label="Announcements">
       <div className="marquee__track">

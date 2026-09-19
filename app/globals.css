@@ -220,6 +220,7 @@ input,select,textarea{font-family:var(--font-body)}
 .co-row .free{color:var(--mint);font-weight:600}
 .co-total{font-size:17px;padding-top:12px}
 .co-total b{font-family:var(--font-display);font-size:22px}
+.co-note{font-size:12px;color:var(--cream-dim);margin:12px 0 0}
 .co-success{max-width:520px;margin:40px auto;text-align:center;background:var(--navy-3);border:1px solid var(--line);border-radius:22px;padding:44px 30px}
 .co-tick{width:70px;height:70px;border-radius:50%;background:var(--mint);color:var(--navy-2);font-size:38px;display:grid;place-items:center;margin:0 auto 18px;font-weight:700}
 .co-success h1{font-size:26px;margin-bottom:10px}

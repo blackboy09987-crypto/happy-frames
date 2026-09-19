@@ -123,8 +123,8 @@ export default function CheckoutPage() {
               })}
             </div>
             <div className="co-row"><span>Subtotal</span><span>{rs(subtotal)}</span></div>
-            <div className="co-row"><span>Delivery</span><span className="free">FREE 🚚</span></div>
             <div className="co-row co-total"><span>Total</span><b>{rs(subtotal)}</b></div>
+            <p className="co-note">Delivery charges (agar hon) team confirm karte waqt bata degi.</p>
           </div>
         </div>
       )}
