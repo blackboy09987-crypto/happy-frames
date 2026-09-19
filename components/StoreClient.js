@@ -1,0 +1,323 @@
+"use client";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ""; // e.g. 923001234567
+const rs = (n) => "Rs " + Number(n || 0).toLocaleString("en-PK");
+
+export default function StoreClient({ initialProducts }) {
+  const [products, setProducts] = useState(initialProducts || []);
+  const [activeCat, setActiveCat] = useState("All");
+  const [cart, setCart] = useState({});
+  const [favs, setFavs] = useState({});
+  const [cartOpen, setCartOpen] = useState(false);
+  const [toast, setToast] = useState("");
+  const [news, setNews] = useState("");
+  const toastTimer = useRef(null);
+
+  // cart localStorage se load
+  useEffect(() => {
+    try { setCart(JSON.parse(localStorage.getItem("hf_cart") || "{}")); } catch (e) {}
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem("hf_cart", JSON.stringify(cart)); } catch (e) {}
+  }, [cart]);
+
+  // mount ke baad fresh products (admin changes ke liye)
+  useEffect(() => {
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((d) => { if (d && Array.isArray(d.products)) setProducts(d.products); })
+      .catch(() => {});
+  }, []);
+
+  const showToast = (m) => {
+    setToast(m);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(""), 2200);
+  };
+
+  const cats = useMemo(
+    () => ["All", ...Array.from(new Set(products.map((p) => p.cat).filter(Boolean)))],
+    [products]
+  );
+  const visible = activeCat === "All" ? products : products.filter((p) => p.cat === activeCat);
+  const findProd = (id) => products.find((p) => String(p.id) === String(id));
+
+  const addToCart = (id) => { setCart((c) => ({ ...c, [id]: (c[id] || 0) + 1 })); setCartOpen(true); };
+  const setQty = (id, d) =>
+    setCart((c) => {
+      const n = (c[id] || 0) + d;
+      const nc = { ...c };
+      if (n <= 0) delete nc[id]; else nc[id] = n;
+      return nc;
+    });
+  const removeItem = (id) => setCart((c) => { const nc = { ...c }; delete nc[id]; return nc; });
+  const toggleFav = (id) => setFavs((f) => ({ ...f, [id]: !f[id] }));
+
+  const cartIds = Object.keys(cart).filter((id) => findProd(id));
+  const cartCount = cartIds.reduce((s, id) => s + cart[id], 0);
+  const subtotal = cartIds.reduce((s, id) => s + findProd(id).price * cart[id], 0);
+
+  const checkout = () => {
+    if (cartCount === 0) { showToast("Cart khaali hai 🛒"); return; }
+    const lines = cartIds.map((id) => {
+      const p = findProd(id);
+      return `• ${p.name} x${cart[id]} — ${rs(p.price * cart[id])}`;
+    });
+    const msg = `Assalamualaikum! Happy Frames se order:\n\n${lines.join("\n")}\n\n*Total: ${rs(subtotal)}*\n\nPlease confirm karein.`;
+    if (WHATSAPP) {
+      window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`, "_blank");
+    } else {
+      alert("Order summary:\n\n" + msg + "\n\n(WhatsApp number set karne ke liye NEXT_PUBLIC_WHATSAPP_NUMBER env variable daalein.)");
+    }
+  };
+
+  // scroll reveal
+  useEffect(() => {
+    const els = document.querySelectorAll(".reveal");
+    const io = new IntersectionObserver(
+      (ents) => ents.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }),
+      { threshold: 0.12 }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <>
+      <Marquee />
+      <Header cartCount={cartCount} onCart={() => setCartOpen(true)} />
+
+      <section className="hero">
+        <div className="blob blob1" /><div className="blob blob2" />
+        <div className="wrap hero__grid">
+          <div className="hero__copy reveal">
+            <span className="eyebrow">Handcrafted photo frames</span>
+            <h1>Frames that make <em>you happy</em>.</h1>
+            <p>Apni yaadon ko ek khoobsurat ghar do. Premium quality frames, custom sizes aur design — jo har deewar ko muskuraahat de.</p>
+            <div className="hero__cta">
+              <a href="#shop" className="btn btn--primary">Shop Now →</a>
+              <a href="#featured" className="btn btn--ghost">Bestsellers</a>
+            </div>
+            <div className="hero__stats">
+              <div className="stat"><b>5k+</b><span>Happy customers</span></div>
+              <div className="stat"><b>4.9★</b><span>Average rating</span></div>
+              <div className="stat"><b>50+</b><span>Frame designs</span></div>
+            </div>
+          </div>
+          <div className="hero__art reveal">
+            <div className="float-frame ff1"><div className="pic">🖼️</div><small>MEMORY WALL</small></div>
+            <div className="float-frame ff2"><div className="pic">🌸</div><small>MINIMAL</small></div>
+            <div className="float-frame ff3"><div className="pic">💛</div><small>CLASSIC</small></div>
+          </div>
+        </div>
+        <div className="wrap">
+          <div className="strip"><div className="strip__row">
+            <div>✋ Handmade</div><div>🌿 Eco Wood</div><div>🚚 Free Shipping</div><div>↩️ 7-Day Returns</div><div>🎨 Custom Sizes</div>
+          </div></div>
+        </div>
+      </section>
+
+      <section className="block" id="shop">
+        <div className="wrap">
+          <div className="head reveal">
+            <div>
+              <span className="eyebrow">Our Collection</span>
+              <h2>Shop the frames</h2>
+              <p>Handcrafted frames, sabhi custom sizes mein available.</p>
+            </div>
+            <a href="#featured" className="btn btn--ghost">View sale</a>
+          </div>
+          <div className="filters">
+            {cats.map((c) => (
+              <button key={c} className={"chip" + (c === activeCat ? " active" : "")} onClick={() => setActiveCat(c)}>{c}</button>
+            ))}
+          </div>
+          <div className="grid">
+            {visible.length === 0 ? (
+              <div className="empty-note">Jald hi naye frames aa rahe hain 💛</div>
+            ) : (
+              visible.map((p) => {
+                const off = p.old && p.old > p.price ? Math.round((1 - p.price / p.old) * 100) : 0;
+                return (
+                  <article className="card" key={p.id}>
+                    <div className="card__img" style={{ background: p.g }}>
+                      {p.img && <img className="card__photo" src={p.img} alt={p.name} />}
+                      {p.badge === "sale" && off ? <span className="card__badge">-{off}%</span>
+                        : p.badge === "new" ? <span className="card__badge new">New</span>
+                        : p.badge === "sale" ? <span className="card__badge">Sale</span> : null}
+                      <button className={"card__fav" + (favs[p.id] ? " on" : "")} onClick={() => toggleFav(p.id)} aria-label="Save">{favs[p.id] ? "♥" : "♡"}</button>
+                      {!p.img && <span>{p.emoji || "🖼️"}</span>}
+                    </div>
+                    <div className="card__body">
+                      <span className="card__cat">{p.cat}</span>
+                      <span className="card__name">{p.name}</span>
+                      <span className="card__rate">★ {Number(p.rating || 0).toFixed(1)} · in stock</span>
+                      <div className="card__foot">
+                        <span className="price"><b>{rs(p.price)}</b>{p.old && p.old > p.price && <s>{rs(p.old)}</s>}</span>
+                        <button className="add" onClick={() => addToCart(p.id)} aria-label="Add to cart">+</button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </section>
+
+      <Features />
+      <Promo />
+      <Newsletter value={news} setValue={setNews} onSubmit={() => setNews("done")} />
+      <Footer />
+
+      {/* CART */}
+      <div className={"overlay" + (cartOpen ? " open" : "")} onClick={() => setCartOpen(false)} />
+      <aside className={"drawer" + (cartOpen ? " open" : "")} aria-label="Shopping cart">
+        <div className="drawer__head"><h3>Your Cart</h3><button className="x" onClick={() => setCartOpen(false)} aria-label="Close">×</button></div>
+        <div className="drawer__body">
+          {cartIds.length === 0 ? (
+            <div className="cart-empty"><div className="big">🛒</div><p>Aapki cart khaali hai.<br />Kuch happy frames add karo!</p></div>
+          ) : (
+            cartIds.map((id) => {
+              const p = findProd(id);
+              return (
+                <div className="citem" key={id}>
+                  <div className="citem__img" style={{ background: p.g }}>{p.img ? <img src={p.img} alt="" /> : (p.emoji || "🖼️")}</div>
+                  <div className="citem__mid">
+                    <b>{p.name}</b><span>{rs(p.price)}</span>
+                    <div className="qty"><button onClick={() => setQty(id, -1)}>−</button><b>{cart[id]}</b><button onClick={() => setQty(id, 1)}>+</button></div>
+                  </div>
+                  <button className="citem__rm" onClick={() => removeItem(id)}>Remove</button>
+                </div>
+              );
+            })
+          )}
+        </div>
+        <div className="drawer__foot">
+          <div className="row"><span>Subtotal</span><b>{rs(subtotal)}</b></div>
+          <button className="btn btn--primary btn--block" onClick={checkout}>Checkout on WhatsApp →</button>
+        </div>
+      </aside>
+
+      <div className={"toast" + (toast ? " show" : "")}>{toast}</div>
+    </>
+  );
+}
+
+function Marquee() {
+  const items = ["🎉 MEGA SALE — Flat 40% OFF on all frames", "🚚 Free delivery all over Pakistan", "🎁 Buy 2 Get 1 Free this week", "💛 Frames that make you happy"];
+  return (
+    <div className="marquee" aria-label="Announcements">
+      <div className="marquee__track">
+        {items.concat(items).map((t, i) => <span key={i}>{t}</span>)}
+      </div>
+    </div>
+  );
+}
+
+function Header({ cartCount, onCart }) {
+  return (
+    <header className="header">
+      <div className="wrap nav">
+        <a className="logo" href="#top"><span className="face">^_</span> Happy Frames</a>
+        <nav className="nav__links"><a href="#shop">Shop</a><a href="#featured">Bestsellers</a><a href="#why">Why Us</a><a href="#contact">Contact</a></nav>
+        <button className="cart-btn" onClick={onCart}>🛒 <span className="lbl">Cart</span> <span className="count">{cartCount}</span></button>
+      </div>
+    </header>
+  );
+}
+
+function Features() {
+  return (
+    <section className="block" id="why" style={{ paddingTop: 10 }}>
+      <div className="wrap">
+        <div className="head reveal"><div><span className="eyebrow">Why Happy Frames</span><h2>Made to make you smile</h2></div></div>
+        <div className="feat reveal">
+          <div className="feat__item"><div className="feat__ic">🪵</div><h3>Premium Material</h3><p>Solid wood aur scratch-proof finish jo saalon chale.</p></div>
+          <div className="feat__item"><div className="feat__ic">🎨</div><h3>Fully Custom</h3><p>Apni size, color aur photo ke sath order karo.</p></div>
+          <div className="feat__item"><div className="feat__ic">🚚</div><h3>Fast Delivery</h3><p>Poore Pakistan mein tez aur safe shipping.</p></div>
+          <div className="feat__item"><div className="feat__ic">💬</div><h3>24/7 Support</h3><p>Order se pehle aur baad — hum hamesha available.</p></div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Promo() {
+  const [t, setT] = useState({ d: "02", h: "08", m: "45", s: "30" });
+  useEffect(() => {
+    const end = Date.now() + (2 * 86400 + 8 * 3600 + 45 * 60 + 30) * 1000;
+    const pad = (n) => String(n).padStart(2, "0");
+    const id = setInterval(() => {
+      let s = Math.max(0, Math.floor((end - Date.now()) / 1000));
+      const d = Math.floor(s / 86400); s -= d * 86400;
+      const h = Math.floor(s / 3600); s -= h * 3600;
+      const m = Math.floor(s / 60); s -= m * 60;
+      setT({ d: pad(d), h: pad(h), m: pad(m), s: pad(s) });
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <section className="block" style={{ paddingBlock: "20px 70px" }} id="featured">
+      <div className="wrap">
+        <div className="promo reveal">
+          <div className="blob blob1" style={{ right: -40, top: -60 }} />
+          <div className="blob blob2" style={{ left: "auto", right: "20%", bottom: -60 }} />
+          <div className="promo__in">
+            <span className="tag">Limited time</span>
+            <h2>Mega Sale — up to <em>40% OFF</em></h2>
+            <p>Best-selling frames par sabse bada discount. Offer khatam hone se pehle grab karo!</p>
+            <div className="promo__timer">
+              <div className="tbox"><b>{t.d}</b><span>Days</span></div>
+              <div className="tbox"><b>{t.h}</b><span>Hrs</span></div>
+              <div className="tbox"><b>{t.m}</b><span>Min</span></div>
+              <div className="tbox"><b>{t.s}</b><span>Sec</span></div>
+            </div>
+            <a href="#shop" className="btn btn--primary">Grab the deal →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Newsletter({ value, setValue, onSubmit }) {
+  const [msg, setMsg] = useState("");
+  return (
+    <section className="wrap news reveal" id="contact">
+      <span className="eyebrow center">Stay in the loop</span>
+      <h2>Get 10% off your first order</h2>
+      <p>Naye designs aur exclusive offers seedha inbox mein — subscribe karo.</p>
+      <form onSubmit={(e) => { e.preventDefault(); setMsg("🎉 Shukriya! 10% discount code aapke email par bhej diya jayega."); e.currentTarget.reset(); }}>
+        <input type="email" placeholder="Enter your email" required aria-label="Email" />
+        <button className="btn btn--primary" type="submit">Subscribe</button>
+      </form>
+      <p style={{ minHeight: 20, marginTop: 14, color: "var(--mint)" }}>{msg}</p>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="footer">
+      <div className="wrap">
+        <div className="foot__grid">
+          <div className="foot__brand">
+            <a className="logo" href="#top"><span className="face">^_</span> Happy Frames</a>
+            <p>Frames that make you happy. Handcrafted with love in Pakistan. 💛</p>
+            <div className="social">
+              <a href="https://www.instagram.com/happy.frames_/" target="_blank" rel="noopener" aria-label="Instagram">📸</a>
+              <a href="#" aria-label="WhatsApp">💬</a>
+              <a href="#" aria-label="Facebook">f</a>
+            </div>
+          </div>
+          <div><h4>Shop</h4><a href="#shop">All Frames</a><a href="#shop">Bestsellers</a><a href="#shop">New Arrivals</a><a href="#featured">On Sale</a></div>
+          <div><h4>Help</h4><a href="#">Shipping</a><a href="#">Returns</a><a href="#">Size Guide</a><a href="#">Track Order</a></div>
+          <div><h4>Company</h4><a href="#">About Us</a><a href="#contact">Contact</a><a href="#">Custom Orders</a><a href="#">Reviews</a></div>
+        </div>
+        <div className="foot__bar"><span>© 2026 Happy Frames. All rights reserved.</span><span>Made with 💛 for happy walls</span></div>
+      </div>
+    </footer>
+  );
+}
