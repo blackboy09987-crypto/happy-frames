@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 // Admin logged-in hai ya nahi + kya Supabase set hai
 export async function GET() {
   return NextResponse.json({
-    admin: isAdminRequest(),
+    admin: await isAdminRequest(),
     supabase: isSupabaseConfigured,
     passwordSet: Boolean(expectedToken()),
   });

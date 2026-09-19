@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 // Admin: product photo upload -> Supabase Storage -> public URL
 export async function POST(req) {
-  if (!isAdminRequest()) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!(await isAdminRequest())) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const supabase = getAdminClient();
   if (!supabase) return NextResponse.json({ error: "Supabase configure nahi hai" }, { status: 400 });
 

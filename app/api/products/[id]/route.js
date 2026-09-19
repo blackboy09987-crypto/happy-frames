@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 // Admin: product edit
 export async function PUT(req, { params }) {
-  if (!isAdminRequest()) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!(await isAdminRequest())) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const supabase = getAdminClient();
   if (!supabase) return NextResponse.json({ error: "Supabase configure nahi hai" }, { status: 400 });
 
@@ -23,7 +23,7 @@ export async function PUT(req, { params }) {
 
 // Admin: product delete
 export async function DELETE(req, { params }) {
-  if (!isAdminRequest()) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!(await isAdminRequest())) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const supabase = getAdminClient();
   if (!supabase) return NextResponse.json({ error: "Supabase configure nahi hai" }, { status: 400 });
 
