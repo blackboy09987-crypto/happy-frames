@@ -15,6 +15,11 @@ export async function POST(req) {
   const notes = String(b.notes || "").slice(0, 500);
   if (!name || !phone || !address) return NextResponse.json({ error: "Naam, phone aur address zaroori hain" }, { status: 400 });
 
+  const allowed = ["COD", "JazzCash", "Easypaisa"];
+  const payment = allowed.includes(b.payment) ? b.payment : "COD";
+  const txnId = String(b.txnId || "").trim().slice(0, 60);
+  if (payment !== "COD" && !txnId) return NextResponse.json({ error: "Transaction ID (TID) zaroori hai" }, { status: 400 });
+
   const items = Array.isArray(b.items) ? b.items : [];
   if (!items.length) return NextResponse.json({ error: "Cart khaali hai" }, { status: 400 });
 
@@ -40,7 +45,7 @@ export async function POST(req) {
   const supabase = getAdminClient();
   if (!supabase) return NextResponse.json({ error: "Store setup adhoora hai" }, { status: 400 });
 
-  const row = { name, phone, address, city, notes, payment: "COD", items: lineItems, subtotal, status: "new" };
+  const row = { name, phone, address, city, notes, payment, txn_id: txnId || null, items: lineItems, subtotal, status: "new" };
   const { data, error } = await supabase.from("orders").insert(row).select("id").single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

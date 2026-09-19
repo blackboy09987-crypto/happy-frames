@@ -7,9 +7,12 @@ export default function CheckoutPage() {
   const [cart, setCart] = useState({});
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({ name: "", phone: "", address: "", city: "", notes: "" });
+  const [payment, setPayment] = useState("COD");
+  const [txnId, setTxnId] = useState("");
+  const [settings, setSettings] = useState({ accountTitle: "", jazzcash: "", easypaisa: "" });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  const [done, setDone] = useState(null); // {orderId, subtotal}
+  const [done, setDone] = useState(null); // {orderId, subtotal, payment}
 
   useEffect(() => {
     try {
@@ -19,7 +22,10 @@ export default function CheckoutPage() {
       setCart(clean);
     } catch (e) {}
     fetch("/api/products").then((r) => r.json()).then((d) => setProducts(d.products || [])).catch(() => {});
+    fetch("/api/settings").then((r) => r.json()).then((d) => { if (d.settings) setSettings(d.settings); }).catch(() => {});
   }, []);
+
+  const acct = payment === "JazzCash" ? settings.jazzcash : payment === "Easypaisa" ? settings.easypaisa : "";
 
   const findProd = (id) => products.find((p) => String(p.id) === String(id));
   const keys = Object.keys(cart).filter((k) => findProd(cart[k].id));
@@ -29,16 +35,17 @@ export default function CheckoutPage() {
   const placeOrder = async () => {
     setErr("");
     if (!form.name.trim() || !form.phone.trim() || !form.address.trim()) { setErr("Naam, phone aur address zaroori hain."); return; }
+    if (payment !== "COD" && !txnId.trim()) { setErr("Payment ka Transaction ID (TID) daalein."); return; }
     if (keys.length === 0) { setErr("Cart khaali hai."); return; }
     setBusy(true);
     const items = keys.map((k) => ({ id: cart[k].id, size: cart[k].size, qty: cart[k].qty }));
-    const r = await fetch("/api/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, items }) });
+    const r = await fetch("/api/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, payment, txnId, items }) });
     setBusy(false);
     if (r.ok) {
       const d = await r.json();
       try { localStorage.removeItem("hf_cart_v2"); } catch (e) {}
       setCart({});
-      setDone({ orderId: d.orderId, subtotal: d.subtotal });
+      setDone({ orderId: d.orderId, subtotal: d.subtotal, payment });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       const d = await r.json().catch(() => ({}));
@@ -58,7 +65,9 @@ export default function CheckoutPage() {
             <span>Order ID</span>
             <b>#{String(done.orderId).slice(0, 8).toUpperCase()}</b>
           </div>
-          <p className="co-cod">💵 Payment: <b>Cash on Delivery</b> — {rs(done.subtotal)} delivery par dena hai.</p>
+          <p className="co-cod">{done.payment === "COD"
+            ? <>💵 Payment: <b>Cash on Delivery</b> — {rs(done.subtotal)} delivery par dena hai.</>
+            : <>📲 Payment: <b>{done.payment}</b> — {rs(done.subtotal)} ka TID mil gaya. Team verify karke order confirm karegi.</>}</p>
           <a href="/" className="btn btn--primary">← Wapas shop par</a>
         </div>
       </div>
@@ -91,19 +100,49 @@ export default function CheckoutPage() {
             <div className="field"><label>Sheher (City)</label><input value={form.city} onChange={(e) => upd("city", e.target.value)} placeholder="e.g. Lahore" /></div>
             <div className="field"><label>Note (optional)</label><input value={form.notes} onChange={(e) => upd("notes", e.target.value)} placeholder="Koi khaas hidayat?" /></div>
 
-            <h2 style={{ marginTop: 22 }}>Payment</h2>
-            <label className="pay-opt selected">
-              <input type="radio" checked readOnly />
-              <div>
-                <b>Cash on Delivery (COD)</b>
-                <span>Order milne par cash mein payment karein.</span>
+            <h2 style={{ marginTop: 22 }}>Payment method</h2>
+            <div className="pay-list">
+              <label className={"pay-opt" + (payment === "COD" ? " on" : "")}>
+                <input type="radio" name="pay" checked={payment === "COD"} onChange={() => setPayment("COD")} />
+                <div><b>Cash on Delivery</b><span>Order milne par cash mein payment.</span></div>
+                <span className="pay-ic">💵</span>
+              </label>
+
+              {settings.jazzcash ? (
+                <label className={"pay-opt" + (payment === "JazzCash" ? " on" : "")}>
+                  <input type="radio" name="pay" checked={payment === "JazzCash"} onChange={() => setPayment("JazzCash")} />
+                  <div><b>JazzCash</b><span>Number par bhej ke TID daalein.</span></div>
+                  <span className="pay-ic">📲</span>
+                </label>
+              ) : null}
+
+              {settings.easypaisa ? (
+                <label className={"pay-opt" + (payment === "Easypaisa" ? " on" : "")}>
+                  <input type="radio" name="pay" checked={payment === "Easypaisa"} onChange={() => setPayment("Easypaisa")} />
+                  <div><b>Easypaisa</b><span>Number par bhej ke TID daalein.</span></div>
+                  <span className="pay-ic">📲</span>
+                </label>
+              ) : null}
+            </div>
+
+            {payment !== "COD" && (
+              <div className="pay-box">
+                <p className="pay-line">Neeche diye <b>{payment}</b> account par <b>{rs(subtotal)}</b> bhejein:</p>
+                <div className="pay-acct">
+                  <div><span>Account title</span><b>{settings.accountTitle || "Happy Frames"}</b></div>
+                  <div><span>{payment} number</span><b>{acct}</b></div>
+                </div>
+                <div className="field" style={{ marginTop: 12, marginBottom: 0 }}>
+                  <label>Transaction ID (TID) *</label>
+                  <input value={txnId} onChange={(e) => setTxnId(e.target.value)} placeholder="Payment ke baad mili TID yahan daalein" />
+                </div>
+                <p className="pay-hint">Paisa bhejne ke baad app se TID copy karke yahan paste karein. Team verify karke order confirm karegi.</p>
               </div>
-              <span className="pay-ic">💵</span>
-            </label>
+            )}
 
             {err && <p style={{ color: "var(--coral)", fontSize: 14, marginTop: 12 }}>{err}</p>}
             <button className="btn btn--primary btn--block" style={{ marginTop: 18 }} onClick={placeOrder} disabled={busy}>
-              {busy ? "Placing order…" : "Place order (COD) →"}
+              {busy ? "Placing order…" : payment === "COD" ? "Place order (COD) →" : "Confirm order →"}
             </button>
           </div>
 

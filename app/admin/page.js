@@ -16,6 +16,7 @@ export default function AdminPage() {
   const [toast, setToast] = useState("");
   const [saleOn, setSaleOn] = useState(false);
   const [saleText, setSaleText] = useState("");
+  const [pay, setPay] = useState({ accountTitle: "", jazzcash: "", easypaisa: "" });
   const [orders, setOrders] = useState([]);
 
   const showToast = (m) => { setToast(m); setTimeout(() => setToast(""), 2200); };
@@ -28,7 +29,7 @@ export default function AdminPage() {
 
   const loadStatus = () => fetch("/api/login").then((r) => r.json()).then(setStatus).catch(() => setStatus({ admin: false }));
   const loadProducts = () => fetch("/api/products").then((r) => r.json()).then((d) => setProducts(d.products || [])).catch(() => {});
-  const loadSettings = () => fetch("/api/settings").then((r) => r.json()).then((d) => { if (d.settings) { setSaleOn(d.settings.saleOn); setSaleText(d.settings.saleText || ""); } }).catch(() => {});
+  const loadSettings = () => fetch("/api/settings").then((r) => r.json()).then((d) => { if (d.settings) { setSaleOn(d.settings.saleOn); setSaleText(d.settings.saleText || ""); setPay({ accountTitle: d.settings.accountTitle || "", jazzcash: d.settings.jazzcash || "", easypaisa: d.settings.easypaisa || "" }); } }).catch(() => {});
   const loadOrders = () => fetch("/api/orders").then((r) => r.json()).then((d) => { if (Array.isArray(d.orders)) setOrders(d.orders); }).catch(() => {});
 
   useEffect(() => { loadStatus(); loadProducts(); loadSettings(); loadOrders(); }, []);
@@ -37,6 +38,12 @@ export default function AdminPage() {
     const on = nextOn !== undefined ? nextOn : saleOn;
     const r = await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ saleOn: on, saleText }) });
     if (r.ok) { const d = await r.json(); setSaleOn(d.settings.saleOn); setSaleText(d.settings.saleText || ""); showToast("Sale settings save ✅"); }
+    else { const d = await r.json().catch(() => ({})); showToast(d.error || "Save fail"); }
+  };
+
+  const savePayment = async () => {
+    const r = await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pay) });
+    if (r.ok) { showToast("Payment accounts save ✅"); loadSettings(); }
     else { const d = await r.json().catch(() => ({})); showToast(d.error || "Save fail"); }
   };
 
@@ -151,6 +158,20 @@ export default function AdminPage() {
         </div>
       </div>
 
+      {/* PAYMENT ACCOUNTS */}
+      <div className="acard" style={{ marginBottom: 20 }}>
+        <h2 style={{ marginBottom: 4 }}>Online Payment Accounts</h2>
+        <p style={{ color: "var(--cream-dim)", fontSize: 13.5, margin: "0 0 16px" }}>
+          Jo number yahan bharoge wahi checkout par customer ko dikhega. Khaali chhodo to wo option chhup jayega (sirf COD dikhega).
+        </p>
+        <div className="field"><label>Account title (naam)</label><input value={pay.accountTitle} onChange={(e) => setPay({ ...pay, accountTitle: e.target.value })} placeholder="e.g. Happy Frames" /></div>
+        <div className="field row2">
+          <div className="field" style={{ margin: 0 }}><label>JazzCash number</label><input value={pay.jazzcash} onChange={(e) => setPay({ ...pay, jazzcash: e.target.value })} placeholder="03xxxxxxxxx" /></div>
+          <div className="field" style={{ margin: 0 }}><label>Easypaisa number</label><input value={pay.easypaisa} onChange={(e) => setPay({ ...pay, easypaisa: e.target.value })} placeholder="03xxxxxxxxx" /></div>
+        </div>
+        <button className="btn btn--primary" onClick={savePayment}>Save payment accounts</button>
+      </div>
+
       <div className="admin__cols">
         {/* FORM */}
         <div className="acard">
@@ -236,10 +257,11 @@ export default function AdminPage() {
             <div className="ordrow" key={o.id}>
               <div className="ordhead">
                 <b>{o.name}</b>
-                <span className="ordtotal">{rs(o.subtotal)} · COD</span>
+                <span className="ordtotal">{rs(o.subtotal)} · {o.payment || "COD"}</span>
               </div>
               <div className="ordmeta">📞 {o.phone}{o.city ? " · " + o.city : ""} · <span style={{ color: "var(--cream-dim)" }}>{new Date(o.created_at).toLocaleString()}</span></div>
               <div className="ordmeta">📍 {o.address}</div>
+              {o.txn_id ? <div className="ordmeta" style={{ color: "var(--gold)" }}>💳 {o.payment} TID: {o.txn_id}</div> : null}
               {o.notes ? <div className="ordmeta">📝 {o.notes}</div> : null}
               <div className="orditems">{(o.items || []).map((it, i) => `${it.name}${it.size ? " (" + it.size + ")" : ""} ×${it.qty}`).join(",  ")}</div>
             </div>
