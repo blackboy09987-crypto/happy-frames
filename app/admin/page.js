@@ -112,6 +112,14 @@ export default function AdminPage() {
     else showToast(d.error || "Import fail");
   };
 
+  const updatePrices = async () => {
+    if (!confirm("Sabhi frames par nayi discounted prices laga dein?\n\nSingle: A5=750, A4=1150, A3=2450 (old crossed).\nIslamic sets: A5=2250, A4=3200, A3=6999.")) return;
+    const r = await fetch("/api/update-prices", { method: "POST" });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok) { showToast(`${d.updated || 0} frames ki prices update ho gayi 💰`); loadProducts(); }
+    else showToast(d.error || "Fail");
+  };
+
   const removeDuplicates = async () => {
     if (!confirm("Duplicate products (same photo wale) hataayein? Har image ka sirf ek rahega.")) return;
     const r = await fetch("/api/dedupe", { method: "POST" });
@@ -285,6 +293,7 @@ export default function AdminPage() {
               <button className="btn btn--ghost btn--sm" onClick={importCars}>🚗 Cars (9)</button>
               <button className="btn btn--ghost btn--sm" onClick={importMovies}>🎬 Movies (14)</button>
               <button className="btn btn--ghost btn--sm" onClick={importIslamic}>🕌 Islamic (3)</button>
+              <button className="btn btn--primary btn--sm" onClick={updatePrices}>💰 Update all prices</button>
               <button className="btn btn--ghost btn--sm" onClick={removeDuplicates} style={{ borderColor: "rgba(232,137,107,.4)" }}>🧹 Remove duplicates</button>
             </div>
           </div>
