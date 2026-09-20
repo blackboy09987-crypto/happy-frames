@@ -105,6 +105,14 @@ export default function AdminPage() {
     else showToast(d.error || "Import fail");
   };
 
+  const removeDuplicates = async () => {
+    if (!confirm("Duplicate products (same photo wale) hataayein? Har image ka sirf ek rahega.")) return;
+    const r = await fetch("/api/dedupe", { method: "POST" });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok) { showToast(d.removed > 0 ? `${d.removed} duplicates hata diye ✅` : "Koi duplicate nahi mila"); loadProducts(); }
+    else showToast(d.error || "Fail");
+  };
+
   const importIslamic = async () => {
     if (!confirm("3 Islamic frames import/update karein? (Sabr Shukr Tawakkul, Islamic Calligraphy, Allah) — sizes A5=1000, A4=1500, A3=2800.")) return;
     const r = await fetch("/api/import-islamic", { method: "POST" });
@@ -269,6 +277,7 @@ export default function AdminPage() {
               <button className="btn btn--ghost btn--sm" onClick={importCars}>🚗 Cars (9)</button>
               <button className="btn btn--ghost btn--sm" onClick={importMovies}>🎬 Movies (14)</button>
               <button className="btn btn--ghost btn--sm" onClick={importIslamic}>🕌 Islamic (3)</button>
+              <button className="btn btn--ghost btn--sm" onClick={removeDuplicates} style={{ borderColor: "rgba(232,137,107,.4)" }}>🧹 Remove duplicates</button>
             </div>
           </div>
           {products.length === 0 && <p style={{ color: "var(--cream-dim)", fontSize: 14 }}>Abhi koi product nahi. Form se add karein.</p>}
