@@ -11,15 +11,23 @@ export async function POST() {
   const supabase = getAdminClient();
   if (!supabase) return NextResponse.json({ error: "Supabase configure nahi hai" }, { status: 400 });
 
-  // pehle se Cars category ke jo products hain unke naam
-  const { data: existing } = await supabase.from("products").select("name").eq("cat", "Cars");
-  const have = new Set((existing || []).map((r) => r.name));
+  // pehle se maujood Cars products — img se pehchaanenge (naam duplicate ho sakte hain)
+  const { data: existing } = await supabase.from("products").select("id,img").eq("cat", "Cars");
+  const byImg = new Map((existing || []).filter((r) => r.img).map((r) => [r.img, r.id]));
 
   const now = Date.now();
-  const rows = CARS.filter((c) => !have.has(c.name)).map((c, i) => ({ ...c, sort: now + i }));
-  if (rows.length === 0) return NextResponse.json({ added: 0, message: "Sab car frames pehle se maujood hain." });
-
-  const { error } = await supabase.from("products").insert(rows);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ added: rows.length });
+  let added = 0, updated = 0;
+  for (let i = 0; i < CARS.length; i++) {
+    const c = { ...CARS[i], sort: now + i };
+    const id = byImg.get(c.img);
+    if (id) {
+      // pehle se hai (shayad purana numbered naam) — update kar do
+      const { error } = await supabase.from("products").update({ name: c.name, description: c.description, tags: c.tags, sizes: c.sizes, price: c.price }).eq("id", id);
+      if (!error) updated++;
+    } else {
+      const { error } = await supabase.from("products").insert(c);
+      if (!error) added++;
+    }
+  }
+  return NextResponse.json({ added, updated });
 }

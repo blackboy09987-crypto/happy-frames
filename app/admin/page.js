@@ -101,7 +101,7 @@ export default function AdminPage() {
     if (!confirm("9 car frames (BMW M4/M5, F1, Porsche 911) import karein? Sizes A5=1000, A4=1500, A3=2800 ke saath.")) return;
     const r = await fetch("/api/import-cars", { method: "POST" });
     const d = await r.json().catch(() => ({}));
-    if (r.ok) { showToast(d.added > 0 ? `${d.added} car frames add ho gaye 🚗` : (d.message || "Pehle se maujood hain")); loadProducts(); }
+    if (r.ok) { showToast(`Cars: ${d.added || 0} add, ${d.updated || 0} update 🚗`); loadProducts(); }
     else showToast(d.error || "Import fail");
   };
 
