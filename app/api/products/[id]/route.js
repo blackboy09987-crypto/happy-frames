@@ -6,11 +6,12 @@ import { isAdminRequest } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 
 // Admin: product edit
-export async function PUT(req, { params }) {
+export async function PUT(req, ctx) {
   if (!(await isAdminRequest())) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const supabase = getAdminClient();
   if (!supabase) return NextResponse.json({ error: "Supabase configure nahi hai" }, { status: 400 });
 
+  const { id } = await ctx.params; // Next 16: params async hai
   const b = await req.json().catch(() => ({}));
   const patch = {};
   ["name", "cat", "badge", "emoji", "g", "img", "description", "tags"].forEach((k) => { if (b[k] !== undefined) patch[k] = b[k]; });
@@ -21,18 +22,19 @@ export async function PUT(req, { params }) {
     if (sizes.length && !patch.price) patch.price = Math.min(...sizes.map((s) => s.price));
   }
 
-  const { data, error } = await supabase.from("products").update(patch).eq("id", params.id).select().single();
+  const { data, error } = await supabase.from("products").update(patch).eq("id", id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ product: rowToProduct(data) });
 }
 
 // Admin: product delete
-export async function DELETE(req, { params }) {
+export async function DELETE(req, ctx) {
   if (!(await isAdminRequest())) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const supabase = getAdminClient();
   if (!supabase) return NextResponse.json({ error: "Supabase configure nahi hai" }, { status: 400 });
 
-  const { error } = await supabase.from("products").delete().eq("id", params.id);
+  const { id } = await ctx.params;
+  const { error } = await supabase.from("products").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
