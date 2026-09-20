@@ -105,6 +105,14 @@ export default function AdminPage() {
     else showToast(d.error || "Import fail");
   };
 
+  const importIslamic = async () => {
+    if (!confirm("3 Islamic frames import/update karein? (Sabr Shukr Tawakkul, Islamic Calligraphy, Allah) — sizes A5=1000, A4=1500, A3=2800.")) return;
+    const r = await fetch("/api/import-islamic", { method: "POST" });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok) { showToast(`Islamic: ${d.added || 0} add, ${d.updated || 0} update 🕌`); loadProducts(); }
+    else showToast(d.error || "Import fail");
+  };
+
   const importMovies = async () => {
     if (!confirm("Movie frames import/update karein? (Breaking Bad, Heisenberg, Spider-Man, The Batman, Joker, Fight Club, Interstellar) — sizes A5=1000, A4=1500, A3=2800.")) return;
     const r = await fetch("/api/import-movies", { method: "POST" });
@@ -260,6 +268,7 @@ export default function AdminPage() {
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <button className="btn btn--ghost btn--sm" onClick={importCars}>🚗 Cars (9)</button>
               <button className="btn btn--ghost btn--sm" onClick={importMovies}>🎬 Movies (14)</button>
+              <button className="btn btn--ghost btn--sm" onClick={importIslamic}>🕌 Islamic (3)</button>
             </div>
           </div>
           {products.length === 0 && <p style={{ color: "var(--cream-dim)", fontSize: 14 }}>Abhi koi product nahi. Form se add karein.</p>}
