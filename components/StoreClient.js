@@ -23,6 +23,8 @@ export default function StoreClient({ initialProducts, initialSettings }) {
   const [favs, setFavs] = useState({});
   const [selSize, setSelSize] = useState({});
   const [cartOpen, setCartOpen] = useState(false);
+  const [viewProduct, setViewProduct] = useState(null);
+  const [viewSizeIdx, setViewSizeIdx] = useState(0);
   const [toast, setToast] = useState("");
   const [news, setNews] = useState("");
   const toastTimer = useRef(null);
@@ -73,15 +75,18 @@ export default function StoreClient({ initialProducts, initialSettings }) {
   const visible = activeCat === "All" ? products : products.filter((p) => p.cat === activeCat);
   const findProd = (id) => products.find((p) => String(p.id) === String(id));
 
-  const addToCart = (p) => {
-    const hasSizes = p.sizes && p.sizes.length;
-    const si = selSize[p.id] || 0;
-    const size = hasSizes ? p.sizes[si] : null;
+  const addItem = (p, size) => {
     const key = p.id + "|" + (size ? size.label : "");
     const price = size ? size.price : p.price;
     setCart((c) => ({ ...c, [key]: { id: p.id, size: size ? size.label : "", price, qty: (c[key]?.qty || 0) + 1 } }));
     setCartOpen(true);
   };
+  const addToCart = (p) => {
+    const hasSizes = p.sizes && p.sizes.length;
+    const si = selSize[p.id] || 0;
+    addItem(p, hasSizes ? p.sizes[si] : null);
+  };
+  const openView = (p) => { setViewProduct(p); setViewSizeIdx(selSize[p.id] || 0); };
   const setQty = (key, d) =>
     setCart((c) => {
       const it = c[key]; if (!it) return c;
@@ -207,17 +212,17 @@ export default function StoreClient({ initialProducts, initialSettings }) {
                 const off = !hasSizes && p.old && p.old > p.price ? Math.round((1 - p.price / p.old) * 100) : 0;
                 return (
                   <article className="card" key={p.id}>
-                    <div className="card__img" style={{ background: p.g }}>
+                    <div className="card__img" style={{ background: p.g, cursor: "pointer" }} onClick={() => openView(p)}>
                       {p.img && <img className="card__photo" src={p.img} alt={p.name} />}
                       {p.badge === "sale" && off ? <span className="card__badge">-{off}%</span>
                         : p.badge === "new" ? <span className="card__badge new">New</span>
                         : p.badge === "sale" ? <span className="card__badge">Sale</span> : null}
-                      <button className={"card__fav" + (favs[p.id] ? " on" : "")} onClick={() => toggleFav(p.id)} aria-label="Save">{favs[p.id] ? "♥" : "♡"}</button>
+                      <button className={"card__fav" + (favs[p.id] ? " on" : "")} onClick={(e) => { e.stopPropagation(); toggleFav(p.id); }} aria-label="Save">{favs[p.id] ? "♥" : "♡"}</button>
                       {!p.img && <span>{p.emoji || "🖼️"}</span>}
                     </div>
                     <div className="card__body">
                       <span className="card__cat">{p.cat}</span>
-                      <span className="card__name">{p.name}</span>
+                      <span className="card__name" style={{ cursor: "pointer" }} onClick={() => openView(p)}>{p.name}</span>
                       <span className="card__rate">★ {Number(p.rating || 0).toFixed(1)} · in stock</span>
                       {p.description ? <span className="card__desc">{p.description}</span> : null}
                       {hasSizes && (
@@ -279,6 +284,41 @@ export default function StoreClient({ initialProducts, initialSettings }) {
             : <button className="btn btn--primary btn--block" onClick={() => showToast("Cart khaali hai 🛒")}>Checkout →</button>}
         </div>
       </aside>
+
+      {/* QUICK VIEW */}
+      {viewProduct && (() => {
+        const p = viewProduct;
+        const hasSizes = p.sizes && p.sizes.length > 0;
+        const si = Math.min(viewSizeIdx, hasSizes ? p.sizes.length - 1 : 0);
+        const price = hasSizes ? p.sizes[si].price : p.price;
+        return (
+          <>
+            <div className="overlay open" style={{ zIndex: 105 }} onClick={() => setViewProduct(null)} />
+            <div className="qv" role="dialog" aria-label={p.name}>
+              <button className="x qv__x" onClick={() => setViewProduct(null)} aria-label="Close">×</button>
+              <div className="qv__img" style={{ background: p.g }}>
+                {p.img ? <img src={p.img} alt={p.name} /> : <span className="qv__emoji">{p.emoji || "🖼️"}</span>}
+              </div>
+              <div className="qv__body">
+                <span className="card__cat">{p.cat}</span>
+                <h3 className="qv__name">{p.name}</h3>
+                <div className="qv__rate">★ {Number(p.rating || 0).toFixed(1)} · in stock</div>
+                {hasSizes && (
+                  <div className="sizes qv__sizes">
+                    {p.sizes.map((s, i) => (
+                      <button key={i} className={"size-chip" + (i === si ? " on" : "")} onClick={() => setViewSizeIdx(i)}>{s.label}</button>
+                    ))}
+                  </div>
+                )}
+                <div className="qv__price"><b>{rs(price)}</b>{!hasSizes && p.old && p.old > p.price && <s>{rs(p.old)}</s>}</div>
+                {p.description ? <p className="qv__desc">{p.description}</p> : null}
+                <button className="btn btn--primary btn--block" onClick={() => { addItem(p, hasSizes ? p.sizes[si] : null); setViewProduct(null); }}>Add to cart →</button>
+                <button className="btn btn--ghost btn--block" style={{ marginTop: 10 }} onClick={() => setViewProduct(null)}>Continue browsing</button>
+              </div>
+            </div>
+          </>
+        );
+      })()}
 
       <div className={"toast" + (toast ? " show" : "")}>{toast}</div>
     </>
