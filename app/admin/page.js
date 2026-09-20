@@ -106,7 +106,7 @@ export default function AdminPage() {
   };
 
   const importMovies = async () => {
-    if (!confirm("8 movie frames (Breaking Bad, Heisenberg, Spider-Man) import karein? Sizes A5=1000, A4=1500, A3=2800 ke saath.")) return;
+    if (!confirm("Movie frames import/update karein? (Breaking Bad, Heisenberg, Spider-Man, The Batman, Joker, Fight Club, Interstellar) — sizes A5=1000, A4=1500, A3=2800.")) return;
     const r = await fetch("/api/import-movies", { method: "POST" });
     const d = await r.json().catch(() => ({}));
     if (r.ok) { showToast(`Movies: ${d.added || 0} add, ${d.updated || 0} update 🎬`); loadProducts(); }
@@ -259,7 +259,7 @@ export default function AdminPage() {
             <h2 style={{ margin: 0 }}>All products ({products.length})</h2>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <button className="btn btn--ghost btn--sm" onClick={importCars}>🚗 Cars (9)</button>
-              <button className="btn btn--ghost btn--sm" onClick={importMovies}>🎬 Movies (8)</button>
+              <button className="btn btn--ghost btn--sm" onClick={importMovies}>🎬 Movies (14)</button>
             </div>
           </div>
           {products.length === 0 && <p style={{ color: "var(--cream-dim)", fontSize: 14 }}>Abhi koi product nahi. Form se add karein.</p>}
