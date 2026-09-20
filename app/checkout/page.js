@@ -43,7 +43,8 @@ export default function CheckoutPage() {
   };
 
   const findProd = (id) => products.find((p) => String(p.id) === String(id));
-  const keys = Object.keys(cart).filter((k) => findProd(cart[k].id));
+  const keys = Object.keys(cart).filter((k) => cart[k].custom || findProd(cart[k].id));
+  const rowFor = (it) => it.custom ? { name: it.name || "Custom Frame", img: it.img, g: "linear-gradient(135deg,#b7c8f0,#8a9be0)", emoji: "🖼️" } : findProd(it.id);
   const subtotal = keys.reduce((s, k) => s + cart[k].price * cart[k].qty, 0);
   const totalQty = keys.reduce((s, k) => s + cart[k].qty, 0);
   const freeDelivery = totalQty >= FREE_DELIVERY_MIN_QTY;
@@ -56,7 +57,7 @@ export default function CheckoutPage() {
     if (payment !== "COD" && !txnId.trim()) { setErr("Payment ka Transaction ID (TID) daalein."); return; }
     if (keys.length === 0) { setErr("Cart khaali hai."); return; }
     setBusy(true);
-    const items = keys.map((k) => ({ id: cart[k].id, size: cart[k].size, qty: cart[k].qty }));
+    const items = keys.map((k) => { const it = cart[k]; return it.custom ? { custom: true, size: it.size, qty: it.qty, img: it.img } : { id: it.id, size: it.size, qty: it.qty }; });
     const r = await fetch("/api/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, payment, txnId, proofUrl, items }) });
     setBusy(false);
     if (r.ok) {
@@ -181,7 +182,7 @@ export default function CheckoutPage() {
             <h2>Your order</h2>
             <div className="co-items">
               {keys.map((k) => {
-                const it = cart[k]; const p = findProd(it.id);
+                const it = cart[k]; const p = rowFor(it);
                 return (
                   <div className="co-item" key={k}>
                     <div className="co-thumb" style={{ background: p.g }}>{p.img ? <img src={p.img} alt="" /> : (p.emoji || "🖼️")}<span className="co-qty">{it.qty}</span></div>

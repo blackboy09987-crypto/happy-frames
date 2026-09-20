@@ -245,6 +245,33 @@ img.pic{display:block}
 .contact-card p{margin:0;font-size:14px;word-break:break-word}
 @media(max-width:640px){.contact-grid{grid-template-columns:1fr}}
 
+/* CUSTOM FRAME PAGE */
+.custom-pg{padding-block:28px 60px}
+.cf-head{text-align:center;max-width:620px;margin:8px auto 34px}
+.cf-head h1{font-size:clamp(28px,5vw,40px);margin:6px 0 10px}
+.cf-head p{color:var(--cream-dim)}
+.cf-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;max-width:920px;margin:0 auto}
+.cf-prev{aspect-ratio:1/1;border-radius:14px;overflow:hidden;background:var(--navy-3);border:1px solid var(--line);display:grid;place-items:center}
+.cf-prev img{width:100%;height:100%;object-fit:cover}
+.cf-ph{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--cream-dim);font-size:34px}
+.cf-ph span{font-size:13px}
+.cf-sizes{display:flex;gap:10px}
+.cf-size{flex:1;background:var(--navy-2);border:1.5px solid var(--line);border-radius:14px;padding:16px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--cream);transition:.15s}
+.cf-size:hover{border-color:var(--cream-dim)}
+.cf-size.on{border-color:var(--gold);background:rgba(229,184,92,.08)}
+.cf-size b{font-family:var(--font-display);font-size:20px}
+.cf-new{font-weight:600;font-size:14px}
+.cf-old{font-size:12px;color:var(--cream-dim);text-decoration:line-through}
+.cf-total{display:flex;align-items:center;justify-content:space-between;margin:18px 0 4px;padding-top:14px;border-top:1px solid var(--line);font-size:15px}
+.cf-tprice b{font-family:var(--font-display);font-size:22px}
+.cf-tprice s{font-size:13px;color:var(--cream-dim);margin-left:6px}
+.cf-ship{font-size:13px;color:var(--mint);margin:6px 0 0}
+.cf-note{max-width:920px;margin:34px auto 0;background:var(--navy-3);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+.cf-note h3{font-size:17px;margin-bottom:10px}
+.cf-note ol{margin:0 0 10px;padding-left:20px;color:var(--cream)}
+.cf-note li{margin-bottom:6px}
+@media(max-width:700px){.cf-grid{grid-template-columns:1fr}}
+
 /* CHECKOUT */
 .checkout{padding-block:28px 60px}
 .co-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}

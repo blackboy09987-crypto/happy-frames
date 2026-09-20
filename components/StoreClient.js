@@ -98,7 +98,8 @@ export default function StoreClient({ initialProducts, initialSettings }) {
   const removeItem = (key) => setCart((c) => { const nc = { ...c }; delete nc[key]; return nc; });
   const toggleFav = (id) => setFavs((f) => ({ ...f, [id]: !f[id] }));
 
-  const cartKeys = Object.keys(cart).filter((k) => findProd(cart[k].id));
+  const cartKeys = Object.keys(cart).filter((k) => cart[k].custom || findProd(cart[k].id));
+  const customFrame = (it) => ({ name: it.name || "Custom Frame", img: it.img, g: "linear-gradient(135deg,#b7c8f0,#8a9be0)", emoji: "🖼️" });
   const cartCount = cartKeys.reduce((s, k) => s + cart[k].qty, 0);
   const subtotal = cartKeys.reduce((s, k) => s + cart[k].price * cart[k].qty, 0);
 
@@ -177,7 +178,7 @@ export default function StoreClient({ initialProducts, initialSettings }) {
           </div>
           <div className="cat-grid reveal">
             {CATEGORIES.map((c) => (
-              <button className="cat-tile" key={c.name} style={{ background: c.g }} onClick={() => goToCategory(c.name)}>
+              <button className="cat-tile" key={c.name} style={{ background: c.g }} onClick={() => c.name === "Custom" ? (window.location.href = "/custom") : goToCategory(c.name)}>
                 <span className="cat-emoji">{c.emoji}</span>
                 <span className="cat-name">{c.label}</span>
               </button>
@@ -265,7 +266,7 @@ export default function StoreClient({ initialProducts, initialSettings }) {
             <div className="cart-empty"><div className="big">🛒</div><p>Aapki cart khaali hai.<br />Kuch happy frames add karo!</p></div>
           ) : (
             cartKeys.map((k) => {
-              const it = cart[k]; const p = findProd(it.id);
+              const it = cart[k]; const p = it.custom ? customFrame(it) : findProd(it.id);
               return (
                 <div className="citem" key={k}>
                   <div className="citem__img" style={{ background: p.g }}>{p.img ? <img src={p.img} alt="" /> : (p.emoji || "🖼️")}</div>
@@ -346,7 +347,7 @@ function Header({ cartCount, onCart }) {
     <header className="header">
       <div className="wrap nav">
         <a className="logo" href="#top"><img className="logo-img" src="/logo.jpg" alt="Happy Frames" /></a>
-        <nav className="nav__links"><a href="#shop">Shop</a><a href="#categories">Categories</a><a href="#why">Why Us</a><a href="/contact">Contact</a></nav>
+        <nav className="nav__links"><a href="#shop">Shop</a><a href="#categories">Categories</a><a href="/custom">Custom Frame</a><a href="/contact">Contact</a></nav>
         <button className="cart-btn" onClick={onCart}>🛒 <span className="lbl">Cart</span> <span className="count">{cartCount}</span></button>
       </div>
     </header>

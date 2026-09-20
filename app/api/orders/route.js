@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getProducts } from "@/lib/data";
 import { getAdminClient } from "@/lib/supabase";
 import { isAdminRequest } from "@/lib/auth";
+import { SIZE_PRICE } from "@/lib/sizes";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,14 @@ export async function POST(req) {
   const lineItems = [];
   let subtotal = 0;
   for (const it of items) {
+    if (it.custom) {
+      const size = SIZE_PRICE[it.size] ? it.size : "A4";
+      const price = SIZE_PRICE[size];
+      const qty = Math.max(1, Math.min(999, Number(it.qty) || 1));
+      subtotal += price * qty;
+      lineItems.push({ name: "Custom Frame", size, qty, price, custom: true, img: String(it.img || "").slice(0, 500) || null });
+      continue;
+    }
     const p = products.find((x) => String(x.id) === String(it.id));
     if (!p) continue;
     let price = p.price;
