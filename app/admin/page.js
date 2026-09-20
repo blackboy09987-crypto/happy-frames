@@ -128,6 +128,14 @@ export default function AdminPage() {
     else showToast(d.error || "Fail");
   };
 
+  const importMotivational = async () => {
+    if (!confirm("8 motivational frames import/update karein? (Discipline, Push Your Limits, Consistency...)")) return;
+    const r = await fetch("/api/import-motivational", { method: "POST" });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok) { showToast(`Motivational: ${d.added || 0} add, ${d.updated || 0} update 💪`); loadProducts(); }
+    else showToast(d.error || "Import fail");
+  };
+
   const importSports = async () => {
     if (!confirm("10 sports frames import/update karein? (Messi, Ronaldo, Neymar, Muhammad Ali, Cricket, Football)")) return;
     const r = await fetch("/api/import-sports", { method: "POST" });
@@ -311,6 +319,7 @@ export default function AdminPage() {
               <button className="btn btn--ghost btn--sm" onClick={importIslamic}>🕌 Islamic (3)</button>
               <button className="btn btn--ghost btn--sm" onClick={importAnime}>🎌 Anime (11)</button>
               <button className="btn btn--ghost btn--sm" onClick={importSports}>🏏 Sports (10)</button>
+              <button className="btn btn--ghost btn--sm" onClick={importMotivational}>💪 Motivational (8)</button>
               <button className="btn btn--primary btn--sm" onClick={updatePrices}>💰 Update all prices</button>
               <button className="btn btn--ghost btn--sm" onClick={removeDuplicates} style={{ borderColor: "rgba(232,137,107,.4)" }}>🧹 Remove duplicates</button>
             </div>
