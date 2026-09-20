@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { GRADIENTS } from "@/lib/seed";
 
 const rs = (n) => "Rs " + Number(n || 0).toLocaleString("en-PK");
-const EMPTY = { name: "", cat: "", price: "", old: "", rating: "4.9", badge: "", emoji: "🖼️", g: GRADIENTS[0], img: null, sizes: [] };
+const EMPTY = { name: "", cat: "", price: "", old: "", rating: "4.9", badge: "", emoji: "🖼️", g: GRADIENTS[0], img: null, sizes: [], description: "", tags: "" };
 
 export default function AdminPage() {
   const [status, setStatus] = useState(null); // {admin, supabase, passwordSet}
@@ -59,7 +59,7 @@ export default function AdminPage() {
 
   const startEdit = (p) => {
     setEditingId(p.id);
-    setForm({ name: p.name || "", cat: p.cat || "", price: p.price ?? "", old: p.old ?? "", rating: p.rating ?? "4.9", badge: p.badge || "", emoji: p.emoji || "🖼️", g: p.g || GRADIENTS[0], img: p.img || null, sizes: Array.isArray(p.sizes) ? p.sizes.map((s) => ({ label: s.label, price: s.price })) : [] });
+    setForm({ name: p.name || "", cat: p.cat || "", price: p.price ?? "", old: p.old ?? "", rating: p.rating ?? "4.9", badge: p.badge || "", emoji: p.emoji || "🖼️", g: p.g || GRADIENTS[0], img: p.img || null, sizes: Array.isArray(p.sizes) ? p.sizes.map((s) => ({ label: s.label, price: s.price })) : [], description: p.description || "", tags: p.tags || "" });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -87,6 +87,7 @@ export default function AdminPage() {
       old: form.old ? Number(form.old) : null, rating: form.rating ? Number(form.rating) : 4.9,
       badge: form.badge, emoji: form.emoji.trim() || "🖼️", g: form.g, img: form.img || null,
       sizes,
+      description: form.description.trim(), tags: form.tags.trim(),
     };
     const url = editingId ? `/api/products/${editingId}` : "/api/products";
     const method = editingId ? "PUT" : "POST";
@@ -94,6 +95,14 @@ export default function AdminPage() {
     setBusy(false);
     if (r.ok) { showToast(editingId ? "Update ho gaya ✅" : "Product add ho gaya 🎉"); resetForm(); loadProducts(); }
     else { const d = await r.json().catch(() => ({})); showToast(d.error || "Save fail"); }
+  };
+
+  const importCars = async () => {
+    if (!confirm("9 car frames (BMW M4/M5, F1, Porsche 911) import karein? Sizes A5=1000, A4=1500, A3=2800 ke saath.")) return;
+    const r = await fetch("/api/import-cars", { method: "POST" });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok) { showToast(d.added > 0 ? `${d.added} car frames add ho gaye 🚗` : (d.message || "Pehle se maujood hain")); loadProducts(); }
+    else showToast(d.error || "Import fail");
   };
 
   const del = async (p) => {
@@ -210,6 +219,12 @@ export default function AdminPage() {
             <div className="field" style={{ margin: 0 }}><label>Rating (0–5)</label><input type="number" min="0" max="5" step="0.1" value={form.rating} onChange={(e) => upd("rating", e.target.value)} /></div>
             <div className="field" style={{ margin: 0 }}><label>Emoji (photo na ho to)</label><input value={form.emoji} onChange={(e) => upd("emoji", e.target.value)} maxLength={4} placeholder="🖼️" /></div>
           </div>
+          <div className="field"><label>Description (SEO)</label>
+            <textarea rows={3} value={form.description} onChange={(e) => upd("description", e.target.value)} placeholder="Is frame ke baare mein 1–2 lines — Google search aur customer ke liye." style={{ background: "var(--navy-2)", border: "1px solid var(--line)", borderRadius: 10, padding: "11px 13px", color: "var(--cream)", fontSize: 14, resize: "vertical" }} />
+          </div>
+          <div className="field"><label>Tags (SEO) — comma se alag</label>
+            <input value={form.tags} onChange={(e) => upd("tags", e.target.value)} placeholder="bmw, m4, car frame, wall art" />
+          </div>
           <div className="field"><label>Background color</label>
             <div className="swatches">
               {GRADIENTS.map((g) => <div key={g} className={"sw" + (g === form.g ? " on" : "")} style={{ background: g }} onClick={() => upd("g", g)} />)}
@@ -232,7 +247,10 @@ export default function AdminPage() {
 
         {/* LIST */}
         <div className="acard">
-          <h2>All products ({products.length})</h2>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
+            <h2 style={{ margin: 0 }}>All products ({products.length})</h2>
+            <button className="btn btn--ghost btn--sm" onClick={importCars}>🚗 Import Cars (9)</button>
+          </div>
           {products.length === 0 && <p style={{ color: "var(--cream-dim)", fontSize: 14 }}>Abhi koi product nahi. Form se add karein.</p>}
           {products.map((p) => (
             <div className="arow" key={p.id}>

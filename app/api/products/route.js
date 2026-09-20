@@ -34,6 +34,8 @@ export async function POST(req) {
     g: b.g || "linear-gradient(135deg,#f4c9a1,#e8896b)",
     img: b.img || null,
     sizes,
+    description: b.description ? String(b.description).slice(0, 600) : "",
+    tags: b.tags ? String(b.tags).slice(0, 300) : "",
     sort: b.sort != null ? Number(b.sort) : Date.now(),
   };
 

@@ -17,9 +17,13 @@ create table if not exists public.products (
   g        text default 'linear-gradient(135deg,#f4c9a1,#e8896b)',
   img      text,
   sizes    jsonb default '[]'::jsonb,
+  description text default '',
+  tags     text default '',
   sort     bigint default 0,
   created_at timestamptz default now()
 );
+alter table public.products add column if not exists description text default '';
+alter table public.products add column if not exists tags text default '';
 
 -- Agar table pehle se maujood hai to sizes column add karne ke liye:
 alter table public.products add column if not exists sizes jsonb default '[]'::jsonb;

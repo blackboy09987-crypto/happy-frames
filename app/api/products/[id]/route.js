@@ -13,7 +13,7 @@ export async function PUT(req, { params }) {
 
   const b = await req.json().catch(() => ({}));
   const patch = {};
-  ["name", "cat", "badge", "emoji", "g", "img"].forEach((k) => { if (b[k] !== undefined) patch[k] = b[k]; });
+  ["name", "cat", "badge", "emoji", "g", "img", "description", "tags"].forEach((k) => { if (b[k] !== undefined) patch[k] = b[k]; });
   ["price", "old", "rating", "sort"].forEach((k) => { if (b[k] !== undefined) patch[k] = b[k] === null ? null : Number(b[k]); });
   if (b.sizes !== undefined) {
     const sizes = cleanSizes(b.sizes);

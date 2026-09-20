@@ -108,8 +108,26 @@ export default function StoreClient({ initialProducts, initialSettings }) {
     return () => io.disconnect();
   }, []);
 
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: products.slice(0, 20).map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Product",
+        name: p.name,
+        ...(p.description ? { description: p.description } : {}),
+        ...(p.img ? { image: p.img.startsWith("http") ? p.img : "https://happyframes.online" + p.img } : {}),
+        category: p.cat,
+        offers: { "@type": "Offer", priceCurrency: "PKR", price: p.price, availability: "https://schema.org/InStock" },
+      },
+    })),
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
       {settings.saleOn && <Marquee text={settings.saleText} />}
       <Header cartCount={cartCount} onCart={() => setCartOpen(true)} />
 
@@ -201,6 +219,7 @@ export default function StoreClient({ initialProducts, initialSettings }) {
                       <span className="card__cat">{p.cat}</span>
                       <span className="card__name">{p.name}</span>
                       <span className="card__rate">★ {Number(p.rating || 0).toFixed(1)} · in stock</span>
+                      {p.description ? <span className="card__desc">{p.description}</span> : null}
                       {hasSizes && (
                         <div className="sizes">
                           {p.sizes.map((s, i) => (
