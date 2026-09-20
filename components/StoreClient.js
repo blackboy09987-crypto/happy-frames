@@ -171,6 +171,8 @@ export default function StoreClient({ initialProducts, initialSettings }) {
         </div>
       </section>
 
+      {settings.saleOn && <Promo />}
+
       <section className="block" id="shop">
         <div className="wrap">
           <div className="head reveal">
@@ -237,7 +239,6 @@ export default function StoreClient({ initialProducts, initialSettings }) {
       </section>
 
       <Features />
-      {settings.saleOn && <Promo />}
       <Newsletter value={news} setValue={setNews} onSubmit={() => setNews("done")} />
       <Footer />
 
