@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { FREE_DELIVERY_MIN_QTY } from "@/lib/sizes";
 
 const rs = (n) => "Rs " + Number(n || 0).toLocaleString("en-PK");
 
@@ -44,6 +45,9 @@ export default function CheckoutPage() {
   const findProd = (id) => products.find((p) => String(p.id) === String(id));
   const keys = Object.keys(cart).filter((k) => findProd(cart[k].id));
   const subtotal = keys.reduce((s, k) => s + cart[k].price * cart[k].qty, 0);
+  const totalQty = keys.reduce((s, k) => s + cart[k].qty, 0);
+  const freeDelivery = totalQty >= FREE_DELIVERY_MIN_QTY;
+  const needMore = Math.max(0, FREE_DELIVERY_MIN_QTY - totalQty);
   const upd = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const placeOrder = async () => {
@@ -188,8 +192,13 @@ export default function CheckoutPage() {
               })}
             </div>
             <div className="co-row"><span>Subtotal</span><span>{rs(subtotal)}</span></div>
+            <div className="co-row"><span>Delivery</span>{freeDelivery ? <span className="free">FREE 🚚</span> : <span style={{ color: "var(--cream-dim)" }}>Team confirm karegi</span>}</div>
             <div className="co-row co-total"><span>Total</span><b>{rs(subtotal)}</b></div>
-            <p className="co-note">Delivery charges (agar hon) team confirm karte waqt bata degi.</p>
+            {freeDelivery
+              ? <p className="co-note" style={{ color: "var(--mint)" }}>🎉 Aapko FREE delivery mil gayi (2 se zyada frames)!</p>
+              : needMore > 0
+                ? <p className="co-note">🚚 Sirf {needMore} aur frame add karein — phir delivery <b>FREE</b>! Warna delivery charges team confirm karte waqt bata degi.</p>
+                : null}
           </div>
         </div>
       )}

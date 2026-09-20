@@ -210,6 +210,8 @@ img.pic{display:block}
 .qv__price{display:flex;align-items:baseline;gap:10px;margin:8px 0}
 .qv__price b{font-family:var(--font-display);font-size:28px}
 .qv__price s{font-size:15px;color:var(--cream-dim)}
+.qv__off{background:var(--coral);color:#fff;font-size:12px;font-weight:700;padding:3px 9px;border-radius:20px;align-self:center}
+.qv__ship{font-size:13px;color:var(--mint);background:rgba(143,201,169,.1);border:1px solid rgba(143,201,169,.3);border-radius:10px;padding:8px 12px;margin-bottom:4px}
 .qv__desc{color:var(--cream-dim);font-size:14px;line-height:1.65;margin:6px 0 16px}
 @media(max-width:640px){
   .qv{grid-template-columns:1fr;top:0;left:0;transform:none;width:100vw;height:100%;max-height:100vh;border-radius:0}
@@ -325,7 +327,7 @@ img.pic{display:block}
 .sizes-admin{display:flex;flex-direction:column;gap:8px}
 .sizerow{display:flex;gap:8px;align-items:center}
 .sizerow input{flex:1;min-width:0;background:var(--navy-2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;color:var(--cream);font-size:14px}
-.sizerow input:last-of-type{max-width:110px;flex:none}
+.sizerow input.num{max-width:82px;flex:none}
 .ordrow{background:var(--navy-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .ordhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
 .ordhead b{font-family:var(--font-display);font-size:15.5px}

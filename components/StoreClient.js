@@ -208,13 +208,15 @@ export default function StoreClient({ initialProducts, initialSettings }) {
               visible.map((p) => {
                 const hasSizes = p.sizes && p.sizes.length > 0;
                 const si = selSize[p.id] || 0;
-                const curPrice = hasSizes ? p.sizes[si].price : p.price;
-                const off = !hasSizes && p.old && p.old > p.price ? Math.round((1 - p.price / p.old) * 100) : 0;
+                const curSize = hasSizes ? p.sizes[si] : null;
+                const curPrice = curSize ? curSize.price : p.price;
+                const curOld = curSize ? curSize.old : p.old;
+                const off = curOld && curOld > curPrice ? Math.round((1 - curPrice / curOld) * 100) : 0;
                 return (
                   <article className="card" key={p.id}>
                     <div className="card__img" style={{ background: p.g, cursor: "pointer" }} onClick={() => openView(p)}>
                       {p.img && <img className="card__photo" src={p.img} alt={p.name} />}
-                      {p.badge === "sale" && off ? <span className="card__badge">-{off}%</span>
+                      {off ? <span className="card__badge">-{off}%</span>
                         : p.badge === "new" ? <span className="card__badge new">New</span>
                         : p.badge === "sale" ? <span className="card__badge">Sale</span> : null}
                       <button className={"card__fav" + (favs[p.id] ? " on" : "")} onClick={(e) => { e.stopPropagation(); toggleFav(p.id); }} aria-label="Save">{favs[p.id] ? "♥" : "♡"}</button>
@@ -236,7 +238,7 @@ export default function StoreClient({ initialProducts, initialSettings }) {
                         <span className="price">
                           {hasSizes && <em className="from">from</em>}
                           <b>{rs(curPrice)}</b>
-                          {!hasSizes && p.old && p.old > p.price && <s>{rs(p.old)}</s>}
+                          {curOld && curOld > curPrice ? <s>{rs(curOld)}</s> : null}
                         </span>
                         <button className="add" onClick={() => addToCart(p)} aria-label="Add to cart">+</button>
                       </div>
@@ -291,6 +293,8 @@ export default function StoreClient({ initialProducts, initialSettings }) {
         const hasSizes = p.sizes && p.sizes.length > 0;
         const si = Math.min(viewSizeIdx, hasSizes ? p.sizes.length - 1 : 0);
         const price = hasSizes ? p.sizes[si].price : p.price;
+        const oldPrice = hasSizes ? p.sizes[si].old : p.old;
+        const qvOff = oldPrice && oldPrice > price ? Math.round((1 - price / oldPrice) * 100) : 0;
         return (
           <>
             <div className="overlay open" style={{ zIndex: 105 }} onClick={() => setViewProduct(null)} />
@@ -310,7 +314,8 @@ export default function StoreClient({ initialProducts, initialSettings }) {
                     ))}
                   </div>
                 )}
-                <div className="qv__price"><b>{rs(price)}</b>{!hasSizes && p.old && p.old > p.price && <s>{rs(p.old)}</s>}</div>
+                <div className="qv__price"><b>{rs(price)}</b>{oldPrice && oldPrice > price ? <s>{rs(oldPrice)}</s> : null}{qvOff ? <span className="qv__off">-{qvOff}%</span> : null}</div>
+                <div className="qv__ship">🚚 2 se zyada frames par <b>FREE delivery</b></div>
                 {p.description ? <p className="qv__desc">{p.description}</p> : null}
                 <button className="btn btn--primary btn--block" onClick={() => { addItem(p, hasSizes ? p.sizes[si] : null); setViewProduct(null); }}>Add to cart →</button>
                 <button className="btn btn--ghost btn--block" style={{ marginTop: 10 }} onClick={() => setViewProduct(null)}>Continue browsing</button>
@@ -326,7 +331,7 @@ export default function StoreClient({ initialProducts, initialSettings }) {
 }
 
 function Marquee({ text }) {
-  const items = [text || "🎉 MEGA SALE", "🖼️ Handcrafted photo frames", "🎁 Buy 2 Get 1 Free this week", "💛 Frames that make you happy"];
+  const items = [text || "🎉 SALE — discount on all frames", "🚚 2 se zyada frames par FREE delivery", "🖼️ Handcrafted photo frames", "💛 Frames that make you happy"];
   return (
     <div className="marquee" aria-label="Announcements">
       <div className="marquee__track">

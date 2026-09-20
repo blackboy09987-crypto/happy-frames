@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import { GRADIENTS } from "@/lib/seed";
+import { STANDARD_SIZES } from "@/lib/sizes";
 
 const rs = (n) => "Rs " + Number(n || 0).toLocaleString("en-PK");
-const EMPTY = { name: "", cat: "", price: "", old: "", rating: "4.9", badge: "", emoji: "🖼️", g: GRADIENTS[0], img: null, sizes: [], description: "", tags: "" };
+const DEFAULT_SIZES = () => STANDARD_SIZES.map((s) => ({ label: s.label, price: s.price, old: s.old }));
+const EMPTY = () => ({ name: "", cat: "", price: "", old: "", rating: "4.9", badge: "", emoji: "🖼️", g: GRADIENTS[0], img: null, sizes: DEFAULT_SIZES(), description: "", tags: "" });
 
 export default function AdminPage() {
   const [status, setStatus] = useState(null); // {admin, supabase, passwordSet}
@@ -11,6 +13,7 @@ export default function AdminPage() {
   const [loginErr, setLoginErr] = useState("");
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState(EMPTY);
+  // note: useState(EMPTY) stores the fn as lazy initializer -> initial form = EMPTY()
   const [editingId, setEditingId] = useState(null);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState("");
@@ -23,7 +26,7 @@ export default function AdminPage() {
   const upd = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   // size options helpers
-  const addSize = () => setForm((f) => ({ ...f, sizes: [...(f.sizes || []), { label: "", price: "" }] }));
+  const addSize = () => setForm((f) => ({ ...f, sizes: [...(f.sizes || []), { label: "", price: "", old: "" }] }));
   const updSize = (i, k, v) => setForm((f) => { const s = [...(f.sizes || [])]; s[i] = { ...s[i], [k]: v }; return { ...f, sizes: s }; });
   const removeSize = (i) => setForm((f) => ({ ...f, sizes: (f.sizes || []).filter((_, idx) => idx !== i) }));
 
@@ -77,7 +80,11 @@ export default function AdminPage() {
 
   const save = async () => {
     if (!form.name.trim()) return showToast("Product name likhein");
-    const sizes = (form.sizes || []).filter((s) => s.label && s.label.trim()).map((s) => ({ label: s.label.trim(), price: Number(s.price) || 0 }));
+    const sizes = (form.sizes || []).filter((s) => s.label && s.label.trim()).map((s) => {
+      const o = { label: s.label.trim(), price: Number(s.price) || 0 };
+      if (s.old) o.old = Number(s.old) || 0;
+      return o;
+    });
     const hasPrice = form.price && Number(form.price) > 0;
     if (!hasPrice && sizes.length === 0) return showToast("Price ya kam se kam ek size likhein");
     setBusy(true);
@@ -230,7 +237,8 @@ export default function AdminPage() {
               {(form.sizes || []).map((s, i) => (
                 <div className="sizerow" key={i}>
                   <input placeholder="Size (e.g. A3)" value={s.label} onChange={(e) => updSize(i, "label", e.target.value)} />
-                  <input type="number" placeholder="Price" value={s.price} onChange={(e) => updSize(i, "price", e.target.value)} />
+                  <input className="num" type="number" placeholder="New" value={s.price} onChange={(e) => updSize(i, "price", e.target.value)} />
+                  <input className="num" type="number" placeholder="Old" value={s.old ?? ""} onChange={(e) => updSize(i, "old", e.target.value)} />
                   <button type="button" className="iconbtn del" onClick={() => removeSize(i)} title="Remove">✕</button>
                 </div>
               ))}
