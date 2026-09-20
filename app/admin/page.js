@@ -105,6 +105,14 @@ export default function AdminPage() {
     else showToast(d.error || "Import fail");
   };
 
+  const importMovies = async () => {
+    if (!confirm("8 movie frames (Breaking Bad, Heisenberg, Spider-Man) import karein? Sizes A5=1000, A4=1500, A3=2800 ke saath.")) return;
+    const r = await fetch("/api/import-movies", { method: "POST" });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok) { showToast(`Movies: ${d.added || 0} add, ${d.updated || 0} update 🎬`); loadProducts(); }
+    else showToast(d.error || "Import fail");
+  };
+
   const del = async (p) => {
     if (!confirm(`"${p.name}" delete karein?`)) return;
     const r = await fetch(`/api/products/${p.id}`, { method: "DELETE" });
@@ -249,7 +257,10 @@ export default function AdminPage() {
         <div className="acard">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 6 }}>
             <h2 style={{ margin: 0 }}>All products ({products.length})</h2>
-            <button className="btn btn--ghost btn--sm" onClick={importCars}>🚗 Import Cars (9)</button>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button className="btn btn--ghost btn--sm" onClick={importCars}>🚗 Cars (9)</button>
+              <button className="btn btn--ghost btn--sm" onClick={importMovies}>🎬 Movies (8)</button>
+            </div>
           </div>
           {products.length === 0 && <p style={{ color: "var(--cream-dim)", fontSize: 14 }}>Abhi koi product nahi. Form se add karein.</p>}
           {products.map((p) => (
