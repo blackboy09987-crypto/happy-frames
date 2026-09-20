@@ -391,8 +391,8 @@ function Promo() {
           <div className="blob blob2" style={{ left: "auto", right: "20%", bottom: -60 }} />
           <div className="promo__in">
             <span className="tag">Limited time</span>
-            <h2>Mega Sale — up to <em>40% OFF</em></h2>
-            <p>Best-selling frames par sabse bada discount. Offer khatam hone se pehle grab karo!</p>
+            <h2>Sale is <em>live</em></h2>
+            <p>Sabhi frames par discount + <b>2 se zyada frames par FREE delivery</b>. Offer khatam hone se pehle grab karo!</p>
             <div className="promo__timer">
               <div className="tbox"><b>{t.d}</b><span>Days</span></div>
               <div className="tbox"><b>{t.h}</b><span>Hrs</span></div>
