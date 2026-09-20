@@ -128,6 +128,14 @@ export default function AdminPage() {
     else showToast(d.error || "Fail");
   };
 
+  const importAnime = async () => {
+    if (!confirm("11 anime frames import/update karein? (Naruto, Luffy, Zoro, Bleach, Haikyuu, Itachi, Ace Luffy Sabo)")) return;
+    const r = await fetch("/api/import-anime", { method: "POST" });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok) { showToast(`Anime: ${d.added || 0} add, ${d.updated || 0} update 🎌`); loadProducts(); }
+    else showToast(d.error || "Import fail");
+  };
+
   const importIslamic = async () => {
     if (!confirm("3 Islamic frames import/update karein? (Sabr Shukr Tawakkul, Islamic Calligraphy, Allah) — sizes A5=1000, A4=1500, A3=2800.")) return;
     const r = await fetch("/api/import-islamic", { method: "POST" });
@@ -293,6 +301,7 @@ export default function AdminPage() {
               <button className="btn btn--ghost btn--sm" onClick={importCars}>🚗 Cars (9)</button>
               <button className="btn btn--ghost btn--sm" onClick={importMovies}>🎬 Movies (14)</button>
               <button className="btn btn--ghost btn--sm" onClick={importIslamic}>🕌 Islamic (3)</button>
+              <button className="btn btn--ghost btn--sm" onClick={importAnime}>🎌 Anime (11)</button>
               <button className="btn btn--primary btn--sm" onClick={updatePrices}>💰 Update all prices</button>
               <button className="btn btn--ghost btn--sm" onClick={removeDuplicates} style={{ borderColor: "rgba(232,137,107,.4)" }}>🧹 Remove duplicates</button>
             </div>
