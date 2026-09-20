@@ -149,9 +149,9 @@ export default function StoreClient({ initialProducts, initialSettings }) {
             </div>
           </div>
           <div className="hero__art reveal">
-            <div className="float-frame ff1"><div className="pic">🖼️</div><small>MEMORY WALL</small></div>
-            <div className="float-frame ff2"><div className="pic">🌸</div><small>MINIMAL</small></div>
-            <div className="float-frame ff3"><div className="pic">💛</div><small>CLASSIC</small></div>
+            <div className="float-frame ff1"><img className="pic" src="/frames/movies/the-batman-1.jpg" alt="The Batman frame" /><small>THE BATMAN</small></div>
+            <div className="float-frame ff2"><img className="pic" src="/frames/movies/spiderman-2.jpg" alt="Spider-Man frame" /><small>SPIDER-MAN</small></div>
+            <div className="float-frame ff3"><img className="pic" src="/frames/movies/spiderman-no-way-home.jpg" alt="Spider-Man No Way Home frame" /><small>NO WAY HOME</small></div>
           </div>
         </div>
         <div className="wrap">
