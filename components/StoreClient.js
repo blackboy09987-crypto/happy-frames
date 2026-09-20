@@ -72,6 +72,10 @@ export default function StoreClient({ initialProducts, initialSettings }) {
     const el = document.getElementById("shop");
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
+  const handleCategory = (name) => {
+    if (name === "Custom") { window.location.href = "/custom"; return; }
+    goToCategory(name);
+  };
   const visible = activeCat === "All" ? products : products.filter((p) => p.cat === activeCat);
   const findProd = (id) => products.find((p) => String(p.id) === String(id));
 
@@ -135,7 +139,7 @@ export default function StoreClient({ initialProducts, initialSettings }) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
       {settings.saleOn && <Marquee text={settings.saleText} />}
-      <Header cartCount={cartCount} onCart={() => setCartOpen(true)} />
+      <Header cartCount={cartCount} onCart={() => setCartOpen(true)} categories={CATEGORIES} onCategory={handleCategory} />
 
       <section className="hero">
         <div className="blob blob1" /><div className="blob blob2" />
@@ -164,26 +168,6 @@ export default function StoreClient({ initialProducts, initialSettings }) {
           <div className="strip"><div className="strip__row">
             <div>✋ Handmade</div><div>🌿 Eco Wood</div><div>🚚 Fast Delivery</div><div>↩️ 7-Day Returns</div><div>🎨 Custom Sizes</div>
           </div></div>
-        </div>
-      </section>
-
-      <section className="cats-sec" id="categories">
-        <div className="wrap">
-          <div className="head reveal">
-            <div>
-              <span className="eyebrow">Browse</span>
-              <h2>Shop by category</h2>
-              <p>Apni pasand ke hisaab se frames chunein — click karke dekhein.</p>
-            </div>
-          </div>
-          <div className="cat-grid reveal">
-            {CATEGORIES.map((c) => (
-              <button className="cat-tile" key={c.name} style={{ background: c.g }} onClick={() => c.name === "Custom" ? (window.location.href = "/custom") : goToCategory(c.name)}>
-                <span className="cat-emoji">{c.emoji}</span>
-                <span className="cat-name">{c.label}</span>
-              </button>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -342,12 +326,24 @@ function Marquee({ text }) {
   );
 }
 
-function Header({ cartCount, onCart }) {
+function Header({ cartCount, onCart, categories = [], onCategory }) {
   return (
     <header className="header">
       <div className="wrap nav">
         <a className="logo" href="#top"><img className="logo-img" src="/logo.jpg" alt="Happy Frames" /></a>
-        <nav className="nav__links"><a href="#shop">Shop</a><a href="#categories">Categories</a><a href="/custom">Custom Frame</a><a href="/contact">Contact</a></nav>
+        <nav className="nav__links">
+          <a href="#shop">Shop</a>
+          <div className="nav__drop">
+            <button className="nav__genre">Genre <span aria-hidden="true">▾</span></button>
+            <div className="nav__menu">
+              {categories.map((c) => (
+                <a key={c.name} onClick={() => onCategory && onCategory(c.name)}>{c.emoji} {c.label}</a>
+              ))}
+            </div>
+          </div>
+          <a href="/custom">Custom Frame</a>
+          <a href="/contact">Contact</a>
+        </nav>
         <button className="cart-btn" onClick={onCart}>🛒 <span className="lbl">Cart</span> <span className="count">{cartCount}</span></button>
       </div>
     </header>
