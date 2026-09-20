@@ -3,6 +3,18 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 const rs = (n) => "Rs " + Number(n || 0).toLocaleString("en-PK");
 
+// Curated categories (tiles + filters). "name" = product ki category se match hoti hai.
+const CATEGORIES = [
+  { name: "Islamic", label: "Islamic", emoji: "🕌", g: "linear-gradient(135deg,#a7d7c3,#6a9b82)" },
+  { name: "Motivational", label: "Motivational", emoji: "💪", g: "linear-gradient(135deg,#f2d98a,#e5b85c)" },
+  { name: "Nature", label: "Nature", emoji: "🌿", g: "linear-gradient(135deg,#a7d7c3,#8fc9a9)" },
+  { name: "Movies", label: "Movies", emoji: "🎬", g: "linear-gradient(135deg,#8a8ea6,#3a3f5c)" },
+  { name: "Cars", label: "Cars", emoji: "🚗", g: "linear-gradient(135deg,#f4c9a1,#e8896b)" },
+  { name: "Cricket", label: "Cricket / Sports", emoji: "🏏", g: "linear-gradient(135deg,#8fc9a9,#5a9b78)" },
+  { name: "Anime", label: "Anime", emoji: "🎌", g: "linear-gradient(135deg,#f6d3dd,#e8a6bb)" },
+  { name: "Custom", label: "Custom Photo", emoji: "📸", g: "linear-gradient(135deg,#b7c8f0,#8a9be0)" },
+];
+
 export default function StoreClient({ initialProducts, initialSettings }) {
   const [products, setProducts] = useState(initialProducts || []);
   const [settings, setSettings] = useState(initialSettings || { saleOn: false, saleText: "" });
@@ -47,10 +59,17 @@ export default function StoreClient({ initialProducts, initialSettings }) {
     toastTimer.current = setTimeout(() => setToast(""), 2200);
   };
 
-  const cats = useMemo(
-    () => ["All", ...Array.from(new Set(products.map((p) => p.cat).filter(Boolean)))],
-    [products]
-  );
+  const cats = useMemo(() => {
+    const merged = CATEGORIES.map((c) => c.name);
+    products.map((p) => p.cat).filter(Boolean).forEach((c) => { if (!merged.includes(c)) merged.push(c); });
+    return ["All", ...merged];
+  }, [products]);
+
+  const goToCategory = (name) => {
+    setActiveCat(name);
+    const el = document.getElementById("shop");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
   const visible = activeCat === "All" ? products : products.filter((p) => p.cat === activeCat);
   const findProd = (id) => products.find((p) => String(p.id) === String(id));
 
@@ -121,6 +140,26 @@ export default function StoreClient({ initialProducts, initialSettings }) {
           <div className="strip"><div className="strip__row">
             <div>✋ Handmade</div><div>🌿 Eco Wood</div><div>🚚 Fast Delivery</div><div>↩️ 7-Day Returns</div><div>🎨 Custom Sizes</div>
           </div></div>
+        </div>
+      </section>
+
+      <section className="cats-sec" id="categories">
+        <div className="wrap">
+          <div className="head reveal">
+            <div>
+              <span className="eyebrow">Browse</span>
+              <h2>Shop by category</h2>
+              <p>Apni pasand ke hisaab se frames chunein — click karke dekhein.</p>
+            </div>
+          </div>
+          <div className="cat-grid reveal">
+            {CATEGORIES.map((c) => (
+              <button className="cat-tile" key={c.name} style={{ background: c.g }} onClick={() => goToCategory(c.name)}>
+                <span className="cat-emoji">{c.emoji}</span>
+                <span className="cat-name">{c.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -243,7 +282,7 @@ function Header({ cartCount, onCart }) {
     <header className="header">
       <div className="wrap nav">
         <a className="logo" href="#top"><img className="logo-img" src="/logo.jpg" alt="Happy Frames" /></a>
-        <nav className="nav__links"><a href="#shop">Shop</a><a href="#featured">Bestsellers</a><a href="#why">Why Us</a><a href="#contact">Contact</a></nav>
+        <nav className="nav__links"><a href="#shop">Shop</a><a href="#categories">Categories</a><a href="#why">Why Us</a><a href="/contact">Contact</a></nav>
         <button className="cart-btn" onClick={onCart}>🛒 <span className="lbl">Cart</span> <span className="count">{cartCount}</span></button>
       </div>
     </header>
