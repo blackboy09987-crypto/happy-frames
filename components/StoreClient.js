@@ -147,7 +147,7 @@ export default function StoreClient({ initialProducts, initialSettings }) {
           <div className="hero__copy reveal">
             <span className="eyebrow">Handcrafted photo frames</span>
             <h1>Frames that make <em>you happy</em>.</h1>
-            <p>Apni yaadon ko ek khoobsurat ghar do. Premium quality frames, custom sizes aur design — jo har deewar ko muskuraahat de.</p>
+            <p>Give your memories a beautiful home. Premium quality frames, custom sizes and designs — that bring a smile to every wall.</p>
             <div className="hero__cta">
               <a href="#shop" className="btn btn--primary">Shop Now →</a>
               <a href="#featured" className="btn btn--ghost">Bestsellers</a>
@@ -179,7 +179,7 @@ export default function StoreClient({ initialProducts, initialSettings }) {
             <div>
               <span className="eyebrow">Our Collection</span>
               <h2>Shop the frames</h2>
-              <p>Handcrafted frames, sabhi custom sizes mein available.</p>
+              <p>Handcrafted frames, available in all custom sizes.</p>
             </div>
             <a href="#featured" className="btn btn--ghost">View sale</a>
           </div>
@@ -190,7 +190,7 @@ export default function StoreClient({ initialProducts, initialSettings }) {
           </div>
           <div className="grid">
             {visible.length === 0 ? (
-              <div className="empty-note">Jald hi naye frames aa rahe hain 💛</div>
+              <div className="empty-note">New frames coming soon 💛</div>
             ) : (
               visible.map((p) => {
                 const hasSizes = p.sizes && p.sizes.length > 0;
@@ -248,7 +248,7 @@ export default function StoreClient({ initialProducts, initialSettings }) {
         <div className="drawer__head"><h3>Your Cart</h3><button className="x" onClick={() => setCartOpen(false)} aria-label="Close">×</button></div>
         <div className="drawer__body">
           {cartKeys.length === 0 ? (
-            <div className="cart-empty"><div className="big">🛒</div><p>Aapki cart khaali hai.<br />Kuch happy frames add karo!</p></div>
+            <div className="cart-empty"><div className="big">🛒</div><p>Your cart is empty.<br />Add some happy frames!</p></div>
           ) : (
             cartKeys.map((k) => {
               const it = cart[k]; const p = it.custom ? customFrame(it) : findProd(it.id);
@@ -269,7 +269,7 @@ export default function StoreClient({ initialProducts, initialSettings }) {
           <div className="row"><span>Subtotal</span><b>{rs(subtotal)}</b></div>
           {cartKeys.length > 0
             ? <a href="/checkout" className="btn btn--primary btn--block">Checkout →</a>
-            : <button className="btn btn--primary btn--block" onClick={() => showToast("Cart khaali hai 🛒")}>Checkout →</button>}
+            : <button className="btn btn--primary btn--block" onClick={() => showToast("Your cart is empty 🛒")}>Checkout →</button>}
         </div>
       </aside>
 
@@ -301,7 +301,7 @@ export default function StoreClient({ initialProducts, initialSettings }) {
                   </div>
                 )}
                 <div className="qv__price"><b>{rs(price)}</b>{oldPrice && oldPrice > price ? <s>{rs(oldPrice)}</s> : null}{qvOff ? <span className="qv__off">-{qvOff}%</span> : null}</div>
-                <div className="qv__ship">🚚 2 se zyada frames par <b>FREE delivery</b></div>
+                <div className="qv__ship">🚚 <b>FREE delivery</b> on more than 2 frames</div>
                 {p.description ? <p className="qv__desc">{p.description}</p> : null}
                 <button className="btn btn--primary btn--block" onClick={() => { addItem(p, hasSizes ? p.sizes[si] : null); setViewProduct(null); }}>Add to cart →</button>
                 <button className="btn btn--ghost btn--block" style={{ marginTop: 10 }} onClick={() => setViewProduct(null)}>Continue browsing</button>
@@ -317,7 +317,7 @@ export default function StoreClient({ initialProducts, initialSettings }) {
 }
 
 function Marquee({ text }) {
-  const items = [text || "🎉 SALE — discount on all frames", "🚚 2 se zyada frames par FREE delivery", "🖼️ Handcrafted photo frames", "💛 Frames that make you happy"];
+  const items = [text || "🎉 SALE — discount on all frames", "🚚 FREE delivery on more than 2 frames", "🖼️ Handcrafted photo frames", "💛 Frames that make you happy"];
   return (
     <div className="marquee" aria-label="Announcements">
       <div className="marquee__track">
@@ -357,10 +357,10 @@ function Features() {
       <div className="wrap">
         <div className="head reveal"><div><span className="eyebrow">Why Happy Frames</span><h2>Made to make you smile</h2></div></div>
         <div className="feat reveal">
-          <div className="feat__item"><div className="feat__ic">🪵</div><h3>Premium Material</h3><p>Solid wood aur scratch-proof finish jo saalon chale.</p></div>
-          <div className="feat__item"><div className="feat__ic">🎨</div><h3>Fully Custom</h3><p>Apni size, color aur photo ke sath order karo.</p></div>
-          <div className="feat__item"><div className="feat__ic">🚚</div><h3>Fast Delivery</h3><p>Poore Pakistan mein tez aur safe shipping.</p></div>
-          <div className="feat__item"><div className="feat__ic">💬</div><h3>24/7 Support</h3><p>Order se pehle aur baad — hum hamesha available.</p></div>
+          <div className="feat__item"><div className="feat__ic">🪵</div><h3>Premium Material</h3><p>Solid wood with a scratch-proof finish that lasts for years.</p></div>
+          <div className="feat__item"><div className="feat__ic">🎨</div><h3>Fully Custom</h3><p>Order with your own size, colour and photo.</p></div>
+          <div className="feat__item"><div className="feat__ic">🚚</div><h3>Fast Delivery</h3><p>Quick and safe shipping all across Pakistan.</p></div>
+          <div className="feat__item"><div className="feat__ic">💬</div><h3>24/7 Support</h3><p>Before and after your order — we're always here to help.</p></div>
         </div>
       </div>
     </section>
@@ -390,7 +390,7 @@ function Promo() {
           <div className="promo__in">
             <span className="tag">Limited time</span>
             <h2>Sale is <em>live</em></h2>
-            <p>Sabhi frames par discount + <b>2 se zyada frames par FREE delivery</b>. Offer khatam hone se pehle grab karo!</p>
+            <p>Discount on all frames + <b>FREE delivery on more than 2 frames</b>. Grab it before the offer ends!</p>
             <div className="promo__timer">
               <div className="tbox"><b>{t.d}</b><span>Days</span></div>
               <div className="tbox"><b>{t.h}</b><span>Hrs</span></div>
@@ -411,8 +411,8 @@ function Newsletter({ value, setValue, onSubmit }) {
     <section className="wrap news reveal" id="contact">
       <span className="eyebrow center">Stay in the loop</span>
       <h2>Get 10% off your first order</h2>
-      <p>Naye designs aur exclusive offers seedha inbox mein — subscribe karo.</p>
-      <form onSubmit={(e) => { e.preventDefault(); setMsg("🎉 Shukriya! 10% discount code aapke email par bhej diya jayega."); e.currentTarget.reset(); }}>
+      <p>New designs and exclusive offers straight to your inbox — subscribe now.</p>
+      <form onSubmit={(e) => { e.preventDefault(); setMsg("🎉 Thank you! Your 10% discount code will be sent to your email."); e.currentTarget.reset(); }}>
         <input type="email" placeholder="Enter your email" required aria-label="Email" />
         <button className="btn btn--primary" type="submit">Subscribe</button>
       </form>

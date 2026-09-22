@@ -5,21 +5,21 @@ export const metadata = { title: "About Us — Happy Frames" };
 export default function About() {
   return (
     <PageShell title="About Happy Frames" subtitle="Frames that make you happy.">
-      <p>Happy Frames ek Pakistan-based handcrafted photo frames brand hai. Hum aapki khoobsurat yaadon ko ek premium ghar dete hain — solid material, custom sizes, aur aise designs jo har deewar ko muskuraahat de.</p>
+      <p>Happy Frames is a Pakistan-based handcrafted photo frames brand. We give your beautiful memories a premium home — solid materials, custom sizes, and designs that bring a smile to every wall.</p>
 
-      <h2>Hum kya banate hain</h2>
+      <h2>What we make</h2>
       <ul>
-        <li>Classic, minimal, vintage aur collage wall frames</li>
-        <li>Custom sizes (A5, A4, A3 aur zyada) — aapki pasand ke hisaab se</li>
-        <li>Scratch-proof finish jo saalon chale</li>
+        <li>Classic, minimal, vintage and collage wall frames</li>
+        <li>Custom sizes (A5, A4, A3 and more) — made to your choice</li>
+        <li>Scratch-proof finish that lasts for years</li>
       </ul>
 
-      <h2>Hamara wada</h2>
-      <p>Quality material, saaf-suthri packing, aur poore Pakistan mein safe delivery. Aapki santushti hamari pehli tarjeeh hai.</p>
+      <h2>Our promise</h2>
+      <p>Quality materials, clean packing, and safe delivery all across Pakistan. Your satisfaction is our top priority.</p>
 
-      <h2>Rabta (Contact)</h2>
+      <h2>Contact</h2>
       <p>Instagram: <a href="https://www.instagram.com/happy.frames_/" target="_blank" rel="noopener">@happy.frames_</a><br />
-      Aur detail ke liye <a href="/contact">Contact page</a> dekhein.</p>
+      For more details, see our <a href="/contact">Contact page</a>.</p>
     </PageShell>
   );
 }

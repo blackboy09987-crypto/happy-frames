@@ -39,7 +39,7 @@ export default function CheckoutPage() {
     const r = await fetch("/api/upload-proof", { method: "POST", body: fd });
     setUploading(false);
     if (r.ok) { const d = await r.json(); setProofUrl(d.url); }
-    else { const d = await r.json().catch(() => ({})); setErr(d.error || "Screenshot upload fail"); }
+    else { const d = await r.json().catch(() => ({})); setErr(d.error || "Screenshot upload failed"); }
   };
 
   const findProd = (id) => products.find((p) => String(p.id) === String(id));
@@ -53,9 +53,9 @@ export default function CheckoutPage() {
 
   const placeOrder = async () => {
     setErr("");
-    if (!form.name.trim() || !form.phone.trim() || !form.address.trim()) { setErr("Naam, phone aur address zaroori hain."); return; }
-    if (payment !== "COD" && !txnId.trim()) { setErr("Payment ka Transaction ID (TID) daalein."); return; }
-    if (keys.length === 0) { setErr("Cart khaali hai."); return; }
+    if (!form.name.trim() || !form.phone.trim() || !form.address.trim()) { setErr("Name, phone and address are required."); return; }
+    if (payment !== "COD" && !txnId.trim()) { setErr("Please enter the payment Transaction ID (TID)."); return; }
+    if (keys.length === 0) { setErr("Your cart is empty."); return; }
     setBusy(true);
     const items = keys.map((k) => { const it = cart[k]; return it.custom ? { custom: true, size: it.size, qty: it.qty, img: it.img } : { id: it.id, size: it.size, qty: it.qty }; });
     const r = await fetch("/api/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, payment, txnId, proofUrl, items }) });
@@ -68,7 +68,7 @@ export default function CheckoutPage() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       const d = await r.json().catch(() => ({}));
-      setErr(d.error || "Order place nahi hua, dobara try karein.");
+      setErr(d.error || "Order could not be placed, please try again.");
     }
   };
 
@@ -78,16 +78,16 @@ export default function CheckoutPage() {
       <div className="wrap checkout">
         <div className="co-success">
           <div className="co-tick">✓</div>
-          <h1>Order confirm ho gaya! 🎉</h1>
-          <p>Shukriya! Aapka order mil gaya hai. Hamari team jald hi aapke number par call/message karke confirm karegi.</p>
+          <h1>Order confirmed! 🎉</h1>
+          <p>Thank you! We've received your order. Our team will call/message you shortly to confirm.</p>
           <div className="co-order">
             <span>Order ID</span>
             <b>#{String(done.orderId).slice(0, 8).toUpperCase()}</b>
           </div>
           <p className="co-cod">{done.payment === "COD"
-            ? <>💵 Payment: <b>Cash on Delivery</b> — {rs(done.subtotal)} delivery par dena hai.</>
-            : <>📲 Payment: <b>{done.payment}</b> — {rs(done.subtotal)} ka TID mil gaya. Team verify karke order confirm karegi.</>}</p>
-          <a href="/" className="btn btn--primary">← Wapas shop par</a>
+            ? <>💵 Payment: <b>Cash on Delivery</b> — pay {rs(done.subtotal)} on delivery.</>
+            : <>📲 Payment: <b>{done.payment}</b> — TID received for {rs(done.subtotal)}. The team will verify and confirm your order.</>}</p>
+          <a href="/" className="btn btn--primary">← Back to shop</a>
         </div>
       </div>
     );
@@ -105,32 +105,32 @@ export default function CheckoutPage() {
       {keys.length === 0 ? (
         <div className="co-empty">
           <div style={{ fontSize: 44, marginBottom: 10 }}>🛒</div>
-          <p>Aapki cart khaali hai.</p>
-          <a href="/" className="btn btn--primary" style={{ marginTop: 12 }}>Shop par jao</a>
+          <p>Your cart is empty.</p>
+          <a href="/" className="btn btn--primary" style={{ marginTop: 12 }}>Go to shop</a>
         </div>
       ) : (
         <div className="co-grid">
           {/* FORM */}
           <div className="acard">
             <h2>Delivery details</h2>
-            <div className="field"><label>Pura naam *</label><input value={form.name} onChange={(e) => upd("name", e.target.value)} placeholder="Aapka naam" /></div>
+            <div className="field"><label>Full name *</label><input value={form.name} onChange={(e) => upd("name", e.target.value)} placeholder="Your name" /></div>
             <div className="field"><label>Phone / WhatsApp number *</label><input value={form.phone} onChange={(e) => upd("phone", e.target.value)} placeholder="03xx xxxxxxx" inputMode="tel" /></div>
-            <div className="field"><label>Pura address *</label><input value={form.address} onChange={(e) => upd("address", e.target.value)} placeholder="Ghar/street, area" /></div>
-            <div className="field"><label>Sheher (City)</label><input value={form.city} onChange={(e) => upd("city", e.target.value)} placeholder="e.g. Lahore" /></div>
-            <div className="field"><label>Note (optional)</label><input value={form.notes} onChange={(e) => upd("notes", e.target.value)} placeholder="Koi khaas hidayat?" /></div>
+            <div className="field"><label>Full address *</label><input value={form.address} onChange={(e) => upd("address", e.target.value)} placeholder="House/street, area" /></div>
+            <div className="field"><label>City</label><input value={form.city} onChange={(e) => upd("city", e.target.value)} placeholder="e.g. Lahore" /></div>
+            <div className="field"><label>Note (optional)</label><input value={form.notes} onChange={(e) => upd("notes", e.target.value)} placeholder="Any special instructions?" /></div>
 
             <h2 style={{ marginTop: 22 }}>Payment method</h2>
             <div className="pay-list">
               <label className={"pay-opt" + (payment === "COD" ? " on" : "")}>
                 <input type="radio" name="pay" checked={payment === "COD"} onChange={() => setPayment("COD")} />
-                <div><b>Cash on Delivery</b><span>Order milne par cash mein payment.</span></div>
+                <div><b>Cash on Delivery</b><span>Pay with cash when your order arrives.</span></div>
                 <span className="pay-ic">💵</span>
               </label>
 
               {settings.jazzcash ? (
                 <label className={"pay-opt" + (payment === "JazzCash" ? " on" : "")}>
                   <input type="radio" name="pay" checked={payment === "JazzCash"} onChange={() => setPayment("JazzCash")} />
-                  <div><b>JazzCash</b><span>Number par bhej ke TID daalein.</span></div>
+                  <div><b>JazzCash</b><span>Send to the number and enter the TID.</span></div>
                   <span className="pay-ic">📲</span>
                 </label>
               ) : null}
@@ -138,7 +138,7 @@ export default function CheckoutPage() {
               {settings.upaisa ? (
                 <label className={"pay-opt" + (payment === "UPaisa" ? " on" : "")}>
                   <input type="radio" name="pay" checked={payment === "UPaisa"} onChange={() => setPayment("UPaisa")} />
-                  <div><b>UPaisa</b><span>Number par bhej ke TID daalein.</span></div>
+                  <div><b>UPaisa</b><span>Send to the number and enter the TID.</span></div>
                   <span className="pay-ic">📲</span>
                 </label>
               ) : null}
@@ -146,28 +146,28 @@ export default function CheckoutPage() {
 
             {payment !== "COD" && (
               <div className="pay-box">
-                <p className="pay-line">Neeche diye <b>{payment}</b> account par <b>{rs(subtotal)}</b> bhejein:</p>
+                <p className="pay-line">Send <b>{rs(subtotal)}</b> to the <b>{payment}</b> account below:</p>
                 <div className="pay-acct">
                   <div><span>Account title</span><b>{settings.accountTitle || "Happy Frames"}</b></div>
                   <div><span>{payment} number</span><b>{acct}</b></div>
                 </div>
                 <div className="field" style={{ marginTop: 12, marginBottom: 0 }}>
                   <label>Transaction ID (TID) *</label>
-                  <input value={txnId} onChange={(e) => setTxnId(e.target.value)} placeholder="Payment ke baad mili TID yahan daalein" />
+                  <input value={txnId} onChange={(e) => setTxnId(e.target.value)} placeholder="Enter the TID you received after payment" />
                 </div>
                 <div className="field" style={{ marginTop: 12, marginBottom: 0 }}>
                   <label>Payment screenshot (optional)</label>
                   {proofUrl ? (
                     <div className="proof-done">
                       <img src={proofUrl} alt="proof" />
-                      <span>✅ Screenshot add ho gaya</span>
+                      <span>✅ Screenshot added</span>
                       <button type="button" className="iconbtn del" onClick={() => setProofUrl("")}>✕</button>
                     </div>
                   ) : (
-                    <label className="drop">{uploading ? "⏳ Uploading…" : "📷 Screenshot upload karein"}<input type="file" accept="image/*" hidden onChange={uploadProof} /></label>
+                    <label className="drop">{uploading ? "⏳ Uploading…" : "📷 Upload screenshot"}<input type="file" accept="image/*" hidden onChange={uploadProof} /></label>
                   )}
                 </div>
-                <p className="pay-hint">Paisa bhejne ke baad app se TID copy karke daalein. Screenshot lagana optional hai par verify jaldi hoti hai. Team confirm karke order pakka karegi.</p>
+                <p className="pay-hint">After sending the payment, copy the TID from your app and paste it here. Adding a screenshot is optional but speeds up verification. The team will confirm and finalize your order.</p>
               </div>
             )}
 
@@ -193,12 +193,12 @@ export default function CheckoutPage() {
               })}
             </div>
             <div className="co-row"><span>Subtotal</span><span>{rs(subtotal)}</span></div>
-            <div className="co-row"><span>Delivery</span>{freeDelivery ? <span className="free">FREE 🚚</span> : <span style={{ color: "var(--cream-dim)" }}>Team confirm karegi</span>}</div>
+            <div className="co-row"><span>Delivery</span>{freeDelivery ? <span className="free">FREE 🚚</span> : <span style={{ color: "var(--cream-dim)" }}>Confirmed by team</span>}</div>
             <div className="co-row co-total"><span>Total</span><b>{rs(subtotal)}</b></div>
             {freeDelivery
-              ? <p className="co-note" style={{ color: "var(--mint)" }}>🎉 Aapko FREE delivery mil gayi (2 se zyada frames)!</p>
+              ? <p className="co-note" style={{ color: "var(--mint)" }}>🎉 You've unlocked FREE delivery (more than 2 frames)!</p>
               : needMore > 0
-                ? <p className="co-note">🚚 Sirf {needMore} aur frame add karein — phir delivery <b>FREE</b>! Warna delivery charges team confirm karte waqt bata degi.</p>
+                ? <p className="co-note">🚚 Add just {needMore} more frame{needMore > 1 ? "s" : ""} to get <b>FREE</b> delivery! Otherwise delivery charges will be confirmed by the team.</p>
                 : null}
           </div>
         </div>

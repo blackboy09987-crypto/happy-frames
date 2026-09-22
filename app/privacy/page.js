@@ -4,33 +4,33 @@ export const metadata = { title: "Privacy Policy — Happy Frames" };
 
 export default function Privacy() {
   return (
-    <PageShell title="Privacy Policy" subtitle="Aapki maloomat ki hifazat hamare liye ahem hai.">
-      <p>Ye policy batati hai ke Happy Frames aapki zaati maloomat kaise jama, istemal aur mehfooz karta hai jab aap hamari website (happyframes.online) istemal karte hain.</p>
+    <PageShell title="Privacy Policy" subtitle="Protecting your information matters to us.">
+      <p>This policy explains how Happy Frames collects, uses, and protects your personal information when you use our website (happyframes.online).</p>
 
-      <h2>Hum kya jama karte hain</h2>
+      <h2>What we collect</h2>
       <ul>
-        <li><strong>Order details:</strong> naam, phone number, delivery address, sheher.</li>
-        <li><strong>Payment info:</strong> payment method aur (agar aap dein) transaction ID/screenshot. Card ki details hum store nahi karte — wo mehfooz payment gateway (jaise PayFast) handle karta hai.</li>
-        <li><strong>Basic technical data:</strong> browser/website usage (behtari ke liye).</li>
+        <li><strong>Order details:</strong> name, phone number, delivery address, city.</li>
+        <li><strong>Payment info:</strong> payment method and (if you provide it) transaction ID/screenshot. We do not store card details — those are handled by a secure payment gateway (such as PayFast).</li>
+        <li><strong>Basic technical data:</strong> browser/website usage (for improvements).</li>
       </ul>
 
-      <h2>Hum ise kaise istemal karte hain</h2>
+      <h2>How we use it</h2>
       <ul>
-        <li>Aapke order ko process aur deliver karne ke liye</li>
-        <li>Order confirm/update ke liye aapse rabta karne ke liye</li>
-        <li>Customer support aur service behtari ke liye</li>
+        <li>To process and deliver your order</li>
+        <li>To contact you for order confirmation/updates</li>
+        <li>For customer support and to improve our service</li>
       </ul>
 
-      <h2>Maloomat sharing</h2>
-      <p>Hum aapki maloomat kisi ko <strong>bechte nahi</strong>. Ise sirf order pura karne ke liye zaroori partners (jaise courier/delivery aur payment gateway) ke saath share kiya jata hai.</p>
+      <h2>Information sharing</h2>
+      <p>We do <strong>not</strong> sell your information. It is only shared with the partners necessary to complete your order (such as courier/delivery and the payment gateway).</p>
 
       <h2>Data security</h2>
-      <p>Payments SSL-secured hain aur regulated payment gateways ke zariye process hote hain. Hum aapki maloomat ko mehfooz rakhne ki poori koshish karte hain.</p>
+      <p>Payments are SSL-secured and processed through regulated payment gateways. We make every effort to keep your information safe.</p>
 
-      <h2>Aapke haqooq</h2>
-      <p>Aap apni maloomat dekhne, theek karne ya delete karwane ke liye humse rabta kar sakte hain.</p>
+      <h2>Your rights</h2>
+      <p>You can contact us to view, correct, or delete your information.</p>
 
-      <p className="legal-note">Sawaalat ke liye <a href="/contact">Contact page</a> dekhein.</p>
+      <p className="legal-note">For any questions, see our <a href="/contact">Contact page</a>.</p>
     </PageShell>
   );
 }

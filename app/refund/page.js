@@ -4,31 +4,31 @@ export const metadata = { title: "Refund & Return Policy — Happy Frames" };
 
 export default function Refund() {
   return (
-    <PageShell title="Refund & Return Policy" subtitle="Aapki santushti hamari zimmedari hai.">
+    <PageShell title="Refund & Return Policy" subtitle="Your satisfaction is our responsibility.">
       <h2>7-Day Return</h2>
-      <p>Agar aapko product milne ke <strong>7 din</strong> ke andar koi masla ho — jaise damaged, defective, ya galat item — to aap return/replacement ke liye rabta kar sakte hain. Product original condition aur packing mein hona chahiye.</p>
+      <p>If there is any issue within <strong>7 days</strong> of receiving your product — such as a damaged, defective, or wrong item — you can contact us for a return/replacement. The product must be in its original condition and packing.</p>
 
-      <h2>Damaged ya galat product</h2>
-      <p>Agar frame delivery ke waqt toota hua ya defective mile, to <strong>24 ghante</strong> ke andar humein Instagram/email par unboxing ki photo/video ke saath ittila dein. Hum free replacement ya full refund denge.</p>
+      <h2>Damaged or wrong product</h2>
+      <p>If a frame arrives broken or defective, please notify us within <strong>24 hours</strong> on Instagram/WhatsApp with an unboxing photo/video. We'll provide a free replacement or a full refund.</p>
 
-      <h2>Refund ka tareeqa</h2>
+      <h2>How refunds work</h2>
       <ul>
-        <li>Return approve hone ke baad refund <strong>5–7 working days</strong> mein process hota hai.</li>
-        <li>Online payment (card/JazzCash/UPaisa) wapas usi account mein aayega.</li>
-        <li>COD orders ka refund bank transfer/wallet ke zariye kiya jayega.</li>
+        <li>Once a return is approved, the refund is processed within <strong>5–7 working days</strong>.</li>
+        <li>Online payments (card/JazzCash/UPaisa) are returned to the same account.</li>
+        <li>COD orders are refunded via bank transfer/wallet.</li>
       </ul>
 
-      <h2>Kya return nahi ho sakta</h2>
+      <h2>What cannot be returned</h2>
       <ul>
-        <li>Custom-made / personalized frames (jab tak defective na hon)</li>
-        <li>Wo products jo istemal kiye gaye ya damaged kiye gaye hon (customer ki taraf se)</li>
-        <li>7 din guzarne ke baad</li>
+        <li>Custom-made / personalized frames (unless defective)</li>
+        <li>Products that have been used or damaged (by the customer)</li>
+        <li>After 7 days have passed</li>
       </ul>
 
       <h2>Cancellation</h2>
-      <p>Order dispatch hone se pehle cancel kiya ja sakta hai. Dispatch ke baad return policy lagoo hogi.</p>
+      <p>An order can be cancelled before it is dispatched. After dispatch, the return policy applies.</p>
 
-      <p className="legal-note">Return ke liye <a href="/contact">Contact page</a> se rabta karein.</p>
+      <p className="legal-note">To request a return, reach us via the <a href="/contact">Contact page</a>.</p>
     </PageShell>
   );
 }

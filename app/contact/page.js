@@ -4,7 +4,7 @@ export const metadata = { title: "Contact — Happy Frames" };
 
 export default function Contact() {
   return (
-    <PageShell title="Contact Us" subtitle="Koi sawaal ya custom order? Hum se rabta karein.">
+    <PageShell title="Contact Us" subtitle="Have a question or a custom order? Get in touch.">
       <div className="contact-grid">
         <div className="contact-card">
           <span className="contact-ic">📸</span>
@@ -23,8 +23,8 @@ export default function Contact() {
         </div>
       </div>
 
-      <h2>Order ke baare mein</h2>
-      <p>Apne order ki tafseel ya status ke liye humein Instagram par message karein ya diye gaye numbers par WhatsApp/call karein. Custom size/design chahiye to bhi rabta karein — hum aapki madad karenge.</p>
+      <h2>About your order</h2>
+      <p>For order details or status, message us on Instagram or WhatsApp/call the numbers above. Need a custom size or design? Get in touch and we'll be happy to help.</p>
 
       <h2>Business hours</h2>
       <p>Monday – Saturday, 11:00 AM – 8:00 PM (PKT)</p>
