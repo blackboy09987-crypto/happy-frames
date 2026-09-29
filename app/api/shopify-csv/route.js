@@ -15,8 +15,21 @@ const COLS = [
   "Image Src", "Image Position", "Image Alt Text", "Status",
 ];
 
+// Uniform sizes + prices for ALL products
+const SHOPIFY_SIZES = [
+  { label: "16×20", price: 4500 },
+  { label: "18×24", price: 6000 },
+  { label: "20×24", price: 6750 },
+  { label: "20×30", price: 8500 },
+  { label: "24×30", price: 10000 },
+  { label: "24×36", price: 12000 },
+  { label: "30×40", price: 17000 },
+  { label: "36×48", price: 24500 },
+];
+
 const q = (v) => `"${String(v == null ? "" : v).replace(/"/g, '""')}"`;
 const imgSrc = (i) => (!i ? "" : i.startsWith("http") ? i : IMG_BASE + i);
+const skuBit = (s) => s.replace(/[^a-z0-9]/gi, "");
 
 export async function GET() {
   const products = await getProducts();
@@ -35,17 +48,15 @@ export async function GET() {
   for (const p of products) {
     const handle = handleFor(p);
     const type = p.cat === "Cricket" ? "Sports" : (p.cat || "Frames");
-    const sizes = (p.sizes && p.sizes.length) ? p.sizes : [{ label: "Standard", price: p.price, old: p.old }];
     const img = imgSrc(p.img);
     const title = (p.name || "Frame").slice(0, 140);
-    sizes.forEach((s, i) => {
+    SHOPIFY_SIZES.forEach((s, i) => {
       const first = i === 0;
-      const price = (s.old && s.old > 0) ? s.old : s.price; // ORIGINAL price
       rows.push([
         q(handle), q(first ? title : ""), q(first ? `<p>${p.description || ""}</p>` : ""), q(first ? "Happy Frames" : ""),
         q(first ? type : ""), q(first ? (p.tags || "") : ""), q(first ? "TRUE" : ""),
-        q("Size"), q(s.label), q(`${handle}-${String(s.label).toLowerCase()}`),
-        q("100"), q("continue"), q("manual"), q(price), q(""), q("TRUE"), q("FALSE"),
+        q("Size"), q(s.label), q(`${handle}-${skuBit(s.label)}`),
+        q("100"), q("continue"), q("manual"), q(s.price), q(""), q("TRUE"), q("FALSE"),
         q(first ? img : ""), q(first && img ? "1" : ""), q(first && img ? title : ""), q(first ? "active" : ""),
       ].join(","));
     });
