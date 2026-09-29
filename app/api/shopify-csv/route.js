@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 // Live products se Shopify import CSV banata hai (ORIGINAL prices, no discount).
 // Browser mein kholने par file download ho jati hai.
-const IMG_BASE = "https://happy-frames-one.vercel.app"; // Shopify import ke waqt images yahan se aayengi
+const IMG_BASE = "https://www.happyframes.online"; // Shopify import ke waqt images yahan se download hongi (bot-friendly, 200 OK)
 
 const COLS = [
   "Handle", "Title", "Body (HTML)", "Vendor", "Type", "Tags", "Published",
