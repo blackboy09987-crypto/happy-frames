@@ -17,6 +17,9 @@ const COLS = [
 
 // Uniform sizes + prices for ALL products
 const SHOPIFY_SIZES = [
+  { label: "6×8.5", price: 1000 },
+  { label: "9×12", price: 1500 },
+  { label: "12×17", price: 2800 },
   { label: "16×20", price: 4500 },
   { label: "18×24", price: 6000 },
   { label: "20×24", price: 6750 },
